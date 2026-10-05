@@ -1,11 +1,13 @@
-name: Build Android APK
+name: Build Android APK - Error Check
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches:
+      - "enterprise-41-implementation"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "enterprise-41-implementation"
 
 permissions:
   contents: read
@@ -13,6 +15,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,13 +27,50 @@ jobs:
           java-version: "17"
           cache: gradle
 
+      - name: Show environment
+        run: |
+          java -version
+          ./gradlew --version
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Check Gradle configuration
+        run: |
+          ./gradlew :app:tasks --all --stacktrace --no-daemon
+
+      - name: Compile Kotlin - show real errors
+        run: |
+          ./gradlew :app:compileDebugKotlin \
+            --stacktrace \
+            --no-daemon \
+            --console=plain
+
+      - name: Compile Java - show real errors
+        run: |
+          ./gradlew :app:compileDebugJavaWithJavac \
+            --stacktrace \
+            --no-daemon \
+            --console=plain
+
+      - name: Run unit tests
+        run: |
+          ./gradlew :app:testDebugUnitTest \
+            --stacktrace \
+            --no-daemon \
+            --console=plain
+
       - name: Build debug APK
         run: |
-          chmod +x ./gradlew
-          ./gradlew :app:assembleDebug --stacktrace --no-daemon
+          ./gradlew :app:assembleDebug \
+            --stacktrace \
+            --no-daemon \
+            --console=plain
 
       - name: Verify APK
-        run: test -f app/build/outputs/apk/debug/app-debug.apk
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
