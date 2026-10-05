@@ -1,0 +1,250 @@
+========================================
+ AURELIA PMS — ERROR & BUG CHECK
+ Date: Tue Oct  6 03:01:03 IST 2026
+========================================
+
+
+### 1. Git status
+----------------------------------------
+?? BUILD_34_PMS_TERMUX.sh
+?? BUILD_34_WIRE_EXISTING_PMS.sh
+?? CHECK_ERRORS_AND_BUGS.sh
+?? ERROR_BUG_REPORT.txt
+
+### 2. Current branch
+----------------------------------------
+enterprise-41-implementation
+
+### 3. Git remote
+----------------------------------------
+origin	https://github.com/Akshayshetye37/5-star-apk.git (fetch)
+origin	https://github.com/Akshayshetye37/5-star-apk.git (push)
+
+### 4. Kotlin/Java source count
+----------------------------------------
+64
+
+### 5. TODO / FIXME / placeholder scan
+----------------------------------------
+app/src/main/java/com/example/util/WorkbookImportManager.kt:272:        value?.replace(",", "")?.replace("₹", "")?.trim()?.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/util/WorkbookImportManager.kt:275:        val n = value.toDoubleOrNull() ?: return value.trim()
+app/src/main/java/com/example/util/CurrencyFormatter.kt:21:        return cleaned.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/HotelApp.kt:258:                    placeholder = { Text("Search guest name or phone number", color = Color.White.copy(alpha = 0.65f)) },
+app/src/main/java/com/example/ui/components/UpiQrDialog.kt:72:    val currentAmount = amountText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/components/UpiQrDialog.kt:167:                    placeholder = { Text("Enter amount or leave empty") },
+app/src/main/java/com/example/ui/screens/BookingsListScreen.kt:146:                    placeholder = { Text("Search by ID, guest, phone, room...") },
+app/src/main/java/com/example/ui/screens/CustomersScreen.kt:137:                    placeholder = { Text("Search by name, phone, ID number...") },
+app/src/main/java/com/example/ui/screens/InvoiceHistoryScreen.kt:130:                    placeholder = { Text("Search invoice, guest, room...") },
+app/src/main/java/com/example/ui/screens/ReservationsScreen.kt:149:                    placeholder = { Text("Search reservations...") },
+app/src/main/java/com/example/ui/screens/ReservationsScreen.kt:507:                        advance = advanceText.toDoubleOrNull() ?: 0.0,
+app/src/main/java/com/example/ui/screens/RoomsScreen.kt:141:                    placeholder = { Text("Search room number, type...") },
+app/src/main/java/com/example/ui/screens/RoomsScreen.kt:487:                        rate = rateText.toDoubleOrNull() ?: 0.0,
+app/src/main/java/com/example/ui/screens/ExpensesScreen.kt:132:                    placeholder = { Text("Search expense description...") },
+app/src/main/java/com/example/ui/screens/ExpensesScreen.kt:338:                    val amount = amountText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/InvoiceGeneratorScreen.kt:166:    val discount = discountText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/InvoiceGeneratorScreen.kt:167:    val taxPercent = taxPercentageText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/InvoiceGeneratorScreen.kt:341:                                    val price = priceStr.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:218:    val cashPaid = advanceText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:219:    val onlinePaid = onlinePaymentText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:240:    val roomCharges = roomChargesText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:241:    val advance = advanceText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:242:    val discount = discountText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:243:    val mineralWater = mineralWaterText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:244:    val ghavaneChatney = ghavaneChatneyText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:245:    val tea = teaText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:246:    val kandePohe = kandePoheText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:247:    val otherCharges = otherChargesText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/SettingsScreen.kt:678:                        taxPercentage = taxPercentageText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:136:                    placeholder = { Text("Search by ID, guest, method...") },
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:383:        amountText.toDoubleOrNull() ?: 0.0
+app/src/main/java/com/example/ui/screens/FoodBreakfastScreen.kt:128:                    placeholder = { Text("Search food or beverage...") },
+app/src/main/java/com/example/ui/screens/FoodBreakfastScreen.kt:374:                        price = priceText.toDoubleOrNull() ?: 0.0,
+app/src/main/java/com/hotel/aureliapms/pms34/report/Pms34FeatureRegistry.kt:6: * already exists in the user's Termux implementation.
+app/src/main/java/com/hotel/aureliapms/pms34/integration/Pms34ModuleCatalog.kt:7: * Payment announcement is deliberately external: the existing implementation
+app/src/main/java/com/hotel/aureliapms/pms34/integration/Pms34IntegrationContract.kt:6: * Adapter contract. Implementations must delegate to the existing application's
+app/src/main/java/com/hotel/aureliapms/pms34/worker/Pms34WorkerContracts.kt:5: * areas. The host WorkManager implementation should call these jobs.
+
+### 6. Dangerous empty implementations
+----------------------------------------
+app/src/main/java/com/example/util/IdOcrRecognizer.kt:50:        if (maxSide <= 0) return null
+app/src/main/java/com/example/util/BackupRestoreManager.kt:652:            val tree = DocumentFile.fromTreeUri(context, treeUri) ?: return false
+app/src/main/java/com/example/util/BackupRestoreManager.kt:654:            val file = tree.createFile("application/json", name) ?: return false
+app/src/main/java/com/example/util/BackupRestoreManager.kt:657:            } ?: return false
+app/src/main/java/com/example/util/WorkbookImportManager.kt:73:        if (bytes == null) return emptyList()
+app/src/main/java/com/example/ui/screens/BookingsListScreen.kt:84:    onOpenDetails: (Booking) -> Unit = {}
+app/src/main/java/com/example/ui/screens/BookingsListScreen.kt:329:    onOpenDetails: () -> Unit = {}
+app/src/main/java/com/example/ui/screens/ReservationsScreen.kt:398:                            onValueChange = {},
+app/src/main/java/com/example/ui/screens/RoomsScreen.kt:427:                        onValueChange = {},
+app/src/main/java/com/example/ui/screens/InvoiceGeneratorScreen.kt:215:                            onValueChange = {},
+app/src/main/java/com/example/ui/screens/InvoiceGeneratorScreen.kt:391:                            onValueChange = {},
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:391:                                    onValueChange = {},
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:540:                            onValueChange = {},
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:614:                            onValueChange = { },
+app/src/main/java/com/example/ui/screens/SettingsScreen.kt:134:            } catch (_: Exception) { }
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:437:                        onValueChange = {},
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:557:                        onValueChange = {},
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:117:        return false
+
+### 7. Duplicate class names
+----------------------------------------
+
+### 8. Duplicate important domain/use-case classes
+----------------------------------------
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt
+app/src/main/java/com/example/data/repository/HotelRepository.kt
+app/src/main/java/com/example/data/usecase/GetLedgerBalanceUseCase.kt
+app/src/main/java/com/example/data/usecase/RecordVerifiedPaymentUseCase.kt
+app/src/main/java/com/hotel/aureliapms/pms34/domain/Pms34UseCases.kt
+
+### 9. Payment announcement files
+----------------------------------------
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementService.kt
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementManager.kt
+
+### 10. Room database / migration references
+----------------------------------------
+app/src/main/java/com/example/util/DataExportManager.kt:108:        val sheet = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:110:        val workbook = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:112:        val rels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:114:        val rootRels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:116:        val content = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:141:        val document = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:143:        val content = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:145:        val rootRels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>"""
+app/src/main/java/com/example/util/DataExportManager.kt:146:        val docRels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>"""
+app/src/main/java/com/example/util/DataExportManager.kt:319:            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:330:            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:341:            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:349:            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+app/src/main/java/com/example/util/DataExportManager.kt:354:        fun sheet(body: String) = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>$body</sheetData></worksheet>"""
+app/src/main/java/com/example/data/database/AppDatabase.kt:6:import androidx.room.RoomDatabase
+app/src/main/java/com/example/data/database/AppDatabase.kt:8:import androidx.room.migration.Migration
+app/src/main/java/com/example/data/database/AppDatabase.kt:49:@Database(
+app/src/main/java/com/example/data/database/AppDatabase.kt:71:    version = 7,
+app/src/main/java/com/example/data/database/AppDatabase.kt:74:private val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:211:private val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:219:abstract class AppDatabase : RoomDatabase() {
+app/src/main/java/com/example/data/database/AppDatabase.kt:240:        private val MIGRATION_1_2 = object : Migration(1, 2) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:248:        private val MIGRATION_2_3 = object : Migration(2, 3) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:273:        private val MIGRATION_3_4 = object : Migration(3, 4) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:375:        private val MIGRATION_4_5 = object : Migration(4, 5) {
+app/src/main/java/com/example/data/database/AppDatabase.kt:436:                    .fallbackToDestructiveMigration(false)
+app/src/main/java/com/example/data/database/AppDatabase.kt:437:                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+app/src/main/java/com/example/data/database/AppDatabase.kt:447:        ) : RoomDatabase.Callback() {
+app/src/main/java/com/example/data/dao/EnterpriseFinanceDaos.kt:39:            version = version + 1,
+app/src/main/java/com/example/data/dao/EnterpriseFinanceDaos.kt:43:          AND version = :expectedVersion
+app/src/main/java/com/example/data/usecase/RecordVerifiedPaymentUseCase.kt:309:                version = 1,
+app/src/main/java/com/example/data/usecase/RecordVerifiedPaymentUseCase.kt:347:                    expectedVersion = folio.version,
+app/src/main/java/com/hotel/aureliapms/pms34/domain/Pms34UseCases.kt:204:        bookings[id] = b.copy(status = BookingStatus.CHECKED_OUT, version = b.version + 1)
+app/src/main/java/com/hotel/aureliapms/pms34/domain/Pms34UseCases.kt:208:        rooms[id] = r.copy(status = status, version = r.version + 1)
+app/src/main/java/com/hotel/aureliapms/pms34/data/Pms34RoomDatabase.kt:6:import androidx.room.RoomDatabase
+app/src/main/java/com/hotel/aureliapms/pms34/data/Pms34RoomDatabase.kt:116:@Database(
+app/src/main/java/com/hotel/aureliapms/pms34/data/Pms34RoomDatabase.kt:122:    version = 1,
+app/src/main/java/com/hotel/aureliapms/pms34/data/Pms34RoomDatabase.kt:125:abstract class Pms34RoomDatabase : RoomDatabase()
+
+### 11. Hard-coded Android SDK / build configuration
+----------------------------------------
+build.gradle.kts:4:  alias(libs.plugins.kotlin.compose) apply false
+gradle.properties:14:# Kotlin code style for this project: "official" or "obsolete":
+gradle.properties:15:kotlin.code.style=official
+gradle.properties:24:# Set the Kotlin compiler execution strategy to in-process to avoid "Could not
+gradle.properties:25:# connect to Kotlin compile daemon" error.
+gradle.properties:26:kotlin.compiler.execution.strategy=in-process
+app/build.gradle.kts:3:  alias(libs.plugins.kotlin.compose)
+app/build.gradle.kts:10:  compileSdk { version = release(36) { minorApiLevel = 1 } }
+app/build.gradle.kts:14:    minSdk = 24
+app/build.gradle.kts:15:    targetSdk = 36
+app/build.gradle.kts:105:  implementation(libs.kotlinx.coroutines.android)
+app/build.gradle.kts:106:  implementation(libs.kotlinx.coroutines.core)
+app/build.gradle.kts:108:  implementation(libs.moshi.kotlin)
+app/build.gradle.kts:116:  testImplementation(libs.kotlinx.coroutines.test)
+app/build.gradle.kts:126:  "ksp"(libs.moshi.kotlin.codegen)
+
+### 12. Gradle wrapper
+----------------------------------------
+
+------------------------------------------------------------
+Gradle 9.3.1
+------------------------------------------------------------
+
+Build time:    2026-01-29 14:15:01 UTC
+Revision:      44f4e8d3122ee6e7cbf5a248d7e20b4ca666bda3
+
+Kotlin:        2.2.21
+Groovy:        4.0.29
+Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+Launcher JVM:  21.0.12 (Termux 21.0.12)
+Daemon JVM:    /data/data/com.termux/files/usr/lib/jvm/java-21-openjdk (no Daemon JVM specified, using current Java home)
+OS:            Linux 4.19.191-gcc12432b279b aarch64
+
+
+### 13. Gradle dependency resolution / configuration check
+----------------------------------------
+Gradle configuration exit code: 0
+
+### 14. Kotlin compiler/build check
+----------------------------------------
+Kotlin compile exit code: 1
+!!! KOTLIN COMPILE ERRORS !!!
+
+### 15. Java compiler/build check
+----------------------------------------
+Java compile exit code: 1
+!!! JAVA COMPILE ERRORS !!!
+
+### 16. Full debug APK build check
+----------------------------------------
+APK build exit code: 1
+!!! APK BUILD FAILED !!!
+
+### 17. Existing payment announcement protection check
+----------------------------------------
+app/src/main/java/com/example/MainActivity.kt:15:import com.example.domain.upi.UpiPaymentAnnouncementManager
+app/src/main/java/com/example/MainActivity.kt:24:        UpiPaymentAnnouncementManager.initialize(this)
+app/src/main/java/com/example/MainActivity.kt:39:        UpiPaymentAnnouncementManager.shutdown()
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementService.kt:7:class UpiPaymentAnnouncementService(
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementService.kt:41:        val message = "Payment received. $currencySymbol $formattedAmount."
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementManager.kt:5:object UpiPaymentAnnouncementManager {
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementManager.kt:8:    private var service: UpiPaymentAnnouncementService? = null
+app/src/main/java/com/example/domain/upi/UpiPaymentAnnouncementManager.kt:14:                    service = UpiPaymentAnnouncementService(
+
+### 18. Suspicious payment creation
+----------------------------------------
+app/src/main/java/com/example/util/BackupRestoreManager.kt:535:                Payment(
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:909:                    val cashPayment = if (!isEditing && cashPaid > 0) Payment(
+app/src/main/java/com/example/ui/screens/NewBookingScreen.kt:919:                    val onlinePayment = if (!isEditing && onlinePaid > 0) Payment(
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:251:                viewModel.recordVerifiedPayment(
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:319:                viewModel.deletePayment(p)
+app/src/main/java/com/example/ui/screens/PaymentsScreen.kt:735:                        Payment(
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:530:    fun recordVerifiedPayment(
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:539:                val result = repository.recordVerifiedPayment(
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:594:     * to recordVerifiedPayment().
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:599:    fun recordPayment(payment: Payment) {
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:601:            repository.recordPayment(payment)
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:606:    fun deletePayment(payment: Payment) {
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:608:            repository.deletePayment(payment)
+app/src/main/java/com/example/ui/viewmodel/HotelViewModel.kt:829:                    val payment = if (paid > 0) Payment(
+app/src/main/java/com/example/data/repository/HotelRepository.kt:263:                    paymentDao.insertPayment(initialPayment)
+app/src/main/java/com/example/data/repository/HotelRepository.kt:265:                additionalPayments.filter { it.amount > 0 }.forEach { paymentDao.insertPayment(it) }
+app/src/main/java/com/example/data/repository/HotelRepository.kt:402:     * The legacy recordPayment() below remains temporarily available
+app/src/main/java/com/example/data/repository/HotelRepository.kt:406:    suspend fun recordVerifiedPayment(
+app/src/main/java/com/example/data/repository/HotelRepository.kt:436:    suspend fun recordPayment(payment: Payment) = withContext(Dispatchers.IO) {
+app/src/main/java/com/example/data/repository/HotelRepository.kt:438:            paymentDao.insertPayment(payment)
+app/src/main/java/com/example/data/repository/HotelRepository.kt:467:    suspend fun deletePayment(payment: Payment) = withContext(Dispatchers.IO) {
+app/src/main/java/com/example/data/repository/HotelRepository.kt:469:            paymentDao.deletePayment(payment)
+app/src/main/java/com/example/data/repository/HotelRepository.kt:584:            data.payments.forEach { paymentDao.insertPayment(it) }
+app/src/main/java/com/example/data/model/Entities.kt:264:data class Payment(
+app/src/main/java/com/example/data/dao/HotelDaos.kt:310:    suspend fun insertPayment(payment: Payment)
+app/src/main/java/com/example/data/dao/HotelDaos.kt:313:    suspend fun updatePayment(payment: Payment)
+app/src/main/java/com/example/data/dao/HotelDaos.kt:316:    suspend fun deletePayment(payment: Payment)
+app/src/main/java/com/example/data/usecase/RecordVerifiedPaymentUseCase.kt:291:            val payment = Payment(
+app/src/main/java/com/example/data/usecase/RecordVerifiedPaymentUseCase.kt:314:            paymentDao.insertPayment(payment)
+
+### 19. Final summary
+----------------------------------------
+Report saved to: /data/data/com.termux/files/home/HotelApp/ERROR_BUG_REPORT.txt
+
+IMPORTANT:
+- Android SDK errors in Termux are environment errors, not necessarily source-code errors.
+- Do NOT create a fake local.properties just to bypass the SDK error.
+- Payment announcement files are only inspected; this checker does not modify them.
