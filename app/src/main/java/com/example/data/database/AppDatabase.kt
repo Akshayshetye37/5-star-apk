@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
         AppSection::class,
         BackupMetadata::class,
         BookingGuest::class,
-        GuestVehicle::class
+        GuestVehicle::class,
         GuestIdentity::class
     ],
     version = 5,
