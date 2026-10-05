@@ -335,7 +335,6 @@ fun RecordPaymentDialog(
         String,
         Boolean
     ) -> Unit,
-    onCompleted: () -> Unit
 ) {
     var selectedBooking by remember {
         mutableStateOf(activeBookings.firstOrNull())

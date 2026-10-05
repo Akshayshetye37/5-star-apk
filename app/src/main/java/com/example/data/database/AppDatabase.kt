@@ -46,31 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(
-    entities = [
-        HotelSettings::class,
-        Customer::class,
-        RoomEntity::class,
-        Reservation::class,
-        Booking::class,
-        Invoice::class,
-        InvoiceItem::class,
-        Payment::class,
-        FoodItem::class,
-        FoodOrder::class,
-        Expense::class,
-        AppSection::class,
-        BackupMetadata::class,
-        BookingGuest::class,
-        GuestVehicle::class,
-        GuestIdentity::class,
-        Folio::class,
-        FolioCharge::class,
-        FinanceTransaction::class
-    ],
-    version = 7,
-    exportSchema = false
-)
 private val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
     override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
         db.execSQL("""
@@ -216,6 +191,31 @@ private val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
     }
 }
 
+@Database(
+    entities = [
+        HotelSettings::class,
+        Customer::class,
+        RoomEntity::class,
+        Reservation::class,
+        Booking::class,
+        Invoice::class,
+        InvoiceItem::class,
+        Payment::class,
+        FoodItem::class,
+        FoodOrder::class,
+        Expense::class,
+        AppSection::class,
+        BackupMetadata::class,
+        BookingGuest::class,
+        GuestVehicle::class,
+        GuestIdentity::class,
+        Folio::class,
+        FolioCharge::class,
+        FinanceTransaction::class
+    ],
+    version = 7,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun hotelSettingsDao(): HotelSettingsDao

@@ -147,7 +147,7 @@ class RecordVerifiedPaymentUseCase(
              */
             val folio =
                 folioDao.getById(normalizedFolioId)
-                    ?: folioDao.getByBooking(normalizedBookingId)
+                    ?: folioDao.getByBookingId(normalizedBookingId)
                     ?: run {
                         val newFolio = Folio(
                             folioId = normalizedFolioId,
