@@ -1,0 +1,6 @@
+{
+  "name": "Hotel Billing System",
+  "description": "Offline native hotel billing and management system for room bookings, reservations, invoicing, food orders, payments, reports, and room availability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

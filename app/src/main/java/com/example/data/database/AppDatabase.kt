@@ -1,0 +1,232 @@
+package com.example.data.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room.migration.Migration
+import com.example.data.dao.AppSectionDao
+import com.example.data.dao.BackupMetadataDao
+import com.example.data.dao.BookingDao
+import com.example.data.dao.BookingGuestDao
+import com.example.data.dao.CustomerDao
+import com.example.data.dao.ExpenseDao
+import com.example.data.dao.FoodDao
+import com.example.data.dao.HotelSettingsDao
+import com.example.data.dao.InvoiceDao
+import com.example.data.dao.PaymentDao
+import com.example.data.dao.ReservationDao
+import com.example.data.dao.RoomDao
+import com.example.data.model.AppSection
+import com.example.data.model.BackupMetadata
+import com.example.data.model.Booking
+import com.example.data.model.BookingGuest
+import com.example.data.model.Customer
+import com.example.data.model.Expense
+import com.example.data.model.FoodItem
+import com.example.data.model.FoodOrder
+import com.example.data.model.HotelSettings
+import com.example.data.model.Invoice
+import com.example.data.model.InvoiceItem
+import com.example.data.model.Payment
+import com.example.data.model.Reservation
+import com.example.data.model.RoomEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+@Database(
+    entities = [
+        HotelSettings::class,
+        Customer::class,
+        RoomEntity::class,
+        Reservation::class,
+        Booking::class,
+        Invoice::class,
+        InvoiceItem::class,
+        Payment::class,
+        FoodItem::class,
+        FoodOrder::class,
+        Expense::class,
+        AppSection::class,
+        BackupMetadata::class,
+        BookingGuest::class
+    ],
+    version = 3,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun hotelSettingsDao(): HotelSettingsDao
+    abstract fun customerDao(): CustomerDao
+    abstract fun roomDao(): RoomDao
+    abstract fun reservationDao(): ReservationDao
+    abstract fun bookingDao(): BookingDao
+    abstract fun bookingGuestDao(): BookingGuestDao
+    abstract fun invoiceDao(): InvoiceDao
+    abstract fun paymentDao(): PaymentDao
+    abstract fun foodDao(): FoodDao
+    abstract fun expenseDao(): ExpenseDao
+    abstract fun appSectionDao(): AppSectionDao
+    abstract fun backupMetadataDao(): BackupMetadataDao
+
+    companion object {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_customers_whatsapp ON customers(whatsapp)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_bookings_contactNumber ON bookings(contactNumber)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_bookings_whatsappNumber ON bookings(whatsappNumber)")
+            }
+        }
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS booking_guests (
+                        guestId TEXT NOT NULL,
+                        bookingId TEXT NOT NULL,
+                        sequence INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        idType TEXT NOT NULL,
+                        idNumber TEXT NOT NULL,
+                        phone TEXT NOT NULL,
+                        whatsapp TEXT NOT NULL,
+                        idPhotoUri TEXT NOT NULL,
+                        vehicleNumbers TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        PRIMARY KEY(guestId)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_booking_guests_bookingId ON booking_guests(bookingId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_booking_guests_name ON booking_guests(name)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_booking_guests_phone ON booking_guests(phone)")
+            }
+        }
+
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "hotel_billing_database.db"
+                )
+                    .fallbackToDestructiveMigration(false)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addCallback(DatabaseCallback(context))
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        private class DatabaseCallback(
+            private val context: Context
+        ) : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val appDb = getDatabase(context)
+                    seedInitialData(appDb)
+                }
+            }
+        }
+
+        suspend fun seedInitialData(db: AppDatabase) {
+            // 1. Initial Hotel Settings
+            if (db.hotelSettingsDao().getSettingsDirect() == null) {
+                db.hotelSettingsDao().saveSettings(
+                    HotelSettings(
+                        id = 1,
+                        hotelName = "HOTEL BILLING SYSTEM",
+                        address = "Hotel Premises, Main Road",
+                        phone = "",
+                        whatsapp = "",
+                        email = "",
+                        gstNumber = "",
+                        logoUri = "android.resource://com.hotelbilling.system/drawable/hotel_logo",
+                        slogan = "",
+                        upiId = "",
+                        upiPayeeName = "",
+                        currencySymbol = "₹",
+                        currencyCode = "INR",
+                        invoicePrefix = "INV-",
+                        invoiceFooter = "Thank you for staying with us! Have a pleasant journey.",
+                        termsAndConditions = "1. Standard Check-in: 12:00 PM | Check-out: 11:00 AM.\n2. Valid Government photo ID required at check-in.\n3. Non-smoking premises in common areas."
+                    )
+                )
+            }
+
+            // 2. THE HOTEL HAS EXACTLY FOUR ROOMS INITIALLY.
+            // 111 — Micro Refine Suit
+            // 156 — Compact Private Suite
+            // 169 — Micro Refine Suit
+            // 166 — Compact Private Suite
+            // Rates set to 0.0 initially as requested.
+            val initialRooms = listOf(
+                RoomEntity(
+                    roomNumber = "111",
+                    roomType = "Micro Refine Suit",
+                    floor = "1st Floor",
+                    rate = 0.0,
+                    status = "AVAILABLE"
+                ),
+                RoomEntity(
+                    roomNumber = "156",
+                    roomType = "Compact Private Suite",
+                    floor = "1st Floor",
+                    rate = 0.0,
+                    status = "AVAILABLE"
+                ),
+                RoomEntity(
+                    roomNumber = "169",
+                    roomType = "Micro Refine Suit",
+                    floor = "1st Floor",
+                    rate = 0.0,
+                    status = "AVAILABLE"
+                ),
+                RoomEntity(
+                    roomNumber = "166",
+                    roomType = "Compact Private Suite",
+                    floor = "1st Floor",
+                    rate = 0.0,
+                    status = "AVAILABLE"
+                )
+            )
+            db.roomDao().insertAll(initialRooms)
+
+            // 3. Initial food items:
+            // Mineral Water, Ghavane Chatney, Tea, Kande Pohe
+            val initialFoodItems = listOf(
+                FoodItem(name = "Mineral Water", category = "Beverage", price = 0.0, description = "Packaged drinking water"),
+                FoodItem(name = "Ghavane Chatney", category = "Breakfast", price = 0.0, description = "Traditional Konkani delicacy with coconut chutney"),
+                FoodItem(name = "Tea", category = "Beverage", price = 0.0, description = "Freshly brewed hot tea"),
+                FoodItem(name = "Kande Pohe", category = "Breakfast", price = 0.0, description = "Classic savory flattened rice with roasted peanuts")
+            )
+            db.foodDao().insertAllItems(initialFoodItems)
+
+            // 4. Default 14 Sections
+            val defaultSections = listOf(
+                AppSection(id = "DASHBOARD", title = "Dashboard", iconName = "Dashboard", orderIndex = 0, isEnabled = true, isCore = true),
+                AppSection(id = "NEW_BOOKING", title = "New Booking", iconName = "AddCircle", orderIndex = 1, isEnabled = true, isCore = true),
+                AppSection(id = "BOOKINGS", title = "Bookings", iconName = "BookOnline", orderIndex = 2, isEnabled = true, isCore = true),
+                AppSection(id = "RESERVATIONS", title = "Reservations", iconName = "EventAvailable", orderIndex = 3, isEnabled = true, isCore = true),
+                AppSection(id = "ROOMS", title = "Rooms & Rates", iconName = "MeetingRoom", orderIndex = 4, isEnabled = true, isCore = true),
+                AppSection(id = "CUSTOMERS", title = "Customers", iconName = "People", orderIndex = 5, isEnabled = true, isCore = true),
+                AppSection(id = "INVOICE_GENERATOR", title = "Invoice Generator", iconName = "Receipt", orderIndex = 6, isEnabled = true, isCore = true),
+                AppSection(id = "INVOICE_HISTORY", title = "Invoice History", iconName = "History", orderIndex = 7, isEnabled = true, isCore = true),
+                AppSection(id = "FOOD", title = "Breakfast / Food", iconName = "Restaurant", orderIndex = 8, isEnabled = true, isCore = true),
+                AppSection(id = "PAYMENTS", title = "Payments", iconName = "Payments", orderIndex = 9, isEnabled = true, isCore = true),
+                AppSection(id = "EXPENSES", title = "Expenses", iconName = "AccountBalanceWallet", orderIndex = 10, isEnabled = true, isCore = true),
+                AppSection(id = "REPORTS", title = "Reports", iconName = "Assessment", orderIndex = 11, isEnabled = true, isCore = true),
+                AppSection(id = "BACKUP_RESTORE", title = "Backup / Restore", iconName = "Backup", orderIndex = 12, isEnabled = true, isCore = true),
+                AppSection(id = "SETTINGS", title = "Settings", iconName = "Settings", orderIndex = 13, isEnabled = true, isCore = true)
+            )
+            db.appSectionDao().insertAll(defaultSections)
+        }
+    }
+}
