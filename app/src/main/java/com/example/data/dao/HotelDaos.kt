@@ -13,6 +13,8 @@ import com.example.data.model.Booking
 import com.example.data.model.BookingGuest
 import com.example.data.model.Customer
 import com.example.data.model.Expense
+import com.example.data.model.GuestVehicle
+import com.example.data.model.GuestIdentity
 import com.example.data.model.FoodItem
 import com.example.data.model.FoodOrder
 import com.example.data.model.HotelSettings
@@ -403,4 +405,127 @@ interface BackupMetadataDao {
 
     @Query("SELECT * FROM backup_metadata")
     suspend fun getAllDirect(): List<BackupMetadata>
+}
+
+@Dao
+interface GuestVehicleDao {
+    @Query("""
+        SELECT * FROM guest_vehicles
+        WHERE bookingId = :bookingId
+        ORDER BY createdAt ASC
+    """)
+    fun getForBooking(bookingId: String): Flow<List<GuestVehicle>>
+
+    @Query("""
+        SELECT * FROM guest_vehicles
+        WHERE bookingId = :bookingId
+        ORDER BY createdAt ASC
+    """)
+    suspend fun getForBookingDirect(bookingId: String): List<GuestVehicle>
+
+    @Query("""
+        SELECT * FROM guest_vehicles
+        WHERE guestId = :guestId
+        ORDER BY createdAt ASC
+    """)
+    suspend fun getForGuestDirect(guestId: String): List<GuestVehicle>
+
+    @Query("""
+        SELECT * FROM guest_vehicles
+        WHERE vehicleId = :vehicleId
+        LIMIT 1
+    """)
+    suspend fun getById(vehicleId: String): GuestVehicle?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(vehicle: GuestVehicle)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(vehicles: List<GuestVehicle>)
+
+    @Update
+    suspend fun update(vehicle: GuestVehicle)
+
+    @Delete
+    suspend fun delete(vehicle: GuestVehicle)
+
+    @Query("DELETE FROM guest_vehicles WHERE bookingId = :bookingId")
+    suspend fun deleteForBooking(bookingId: String)
+
+    @Query("DELETE FROM guest_vehicles WHERE guestId = :guestId")
+    suspend fun deleteForGuest(guestId: String)
+
+    @Query("""
+        SELECT COUNT(*) FROM guest_vehicles
+        WHERE bookingId = :bookingId
+    """)
+    suspend fun countForBooking(bookingId: String): Int
+
+    @Query("SELECT * FROM guest_vehicles")
+    suspend fun getAllDirect(): List<GuestVehicle>
+}
+
+@Dao
+interface GuestIdentityDao {
+    @Query("""
+        SELECT * FROM guest_identities
+        WHERE bookingId = :bookingId
+        ORDER BY createdAt ASC
+    """)
+    fun getForBooking(bookingId: String): Flow<List<GuestIdentity>>
+
+    @Query("""
+        SELECT * FROM guest_identities
+        WHERE bookingId = :bookingId
+        ORDER BY createdAt ASC
+    """)
+    suspend fun getForBookingDirect(bookingId: String): List<GuestIdentity>
+
+    @Query("""
+        SELECT * FROM guest_identities
+        WHERE guestId = :guestId
+        ORDER BY createdAt ASC
+    """)
+    fun getForGuest(guestId: String): Flow<List<GuestIdentity>>
+
+    @Query("""
+        SELECT * FROM guest_identities
+        WHERE guestId = :guestId
+        ORDER BY createdAt ASC
+    """)
+    suspend fun getForGuestDirect(guestId: String): List<GuestIdentity>
+
+    @Query("""
+        SELECT * FROM guest_identities
+        WHERE identityId = :identityId
+        LIMIT 1
+    """)
+    suspend fun getById(identityId: String): GuestIdentity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(identity: GuestIdentity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(identities: List<GuestIdentity>)
+
+    @Update
+    suspend fun update(identity: GuestIdentity)
+
+    @Delete
+    suspend fun delete(identity: GuestIdentity)
+
+    @Query("""
+        DELETE FROM guest_identities
+        WHERE guestId = :guestId
+    """)
+    suspend fun deleteForGuest(guestId: String)
+
+    @Query("""
+        DELETE FROM guest_identities
+        WHERE bookingId = :bookingId
+    """)
+    suspend fun deleteForBooking(bookingId: String)
+
+    @Query("SELECT * FROM guest_identities")
+    suspend fun getAllDirect(): List<GuestIdentity>
 }

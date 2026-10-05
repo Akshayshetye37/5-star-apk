@@ -10,6 +10,8 @@ import com.example.data.dao.AppSectionDao
 import com.example.data.dao.BackupMetadataDao
 import com.example.data.dao.BookingDao
 import com.example.data.dao.BookingGuestDao
+import com.example.data.dao.GuestVehicleDao
+import com.example.data.dao.GuestIdentityDao
 import com.example.data.dao.CustomerDao
 import com.example.data.dao.ExpenseDao
 import com.example.data.dao.FoodDao
@@ -24,6 +26,8 @@ import com.example.data.model.Booking
 import com.example.data.model.BookingGuest
 import com.example.data.model.Customer
 import com.example.data.model.Expense
+import com.example.data.model.GuestVehicle
+import com.example.data.model.GuestIdentity
 import com.example.data.model.FoodItem
 import com.example.data.model.FoodOrder
 import com.example.data.model.HotelSettings
@@ -51,9 +55,11 @@ import kotlinx.coroutines.launch
         Expense::class,
         AppSection::class,
         BackupMetadata::class,
-        BookingGuest::class
+        BookingGuest::class,
+        GuestVehicle::class
+        GuestIdentity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -64,6 +70,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun reservationDao(): ReservationDao
     abstract fun bookingDao(): BookingDao
     abstract fun bookingGuestDao(): BookingGuestDao
+    abstract fun guestVehicleDao(): GuestVehicleDao
+    abstract fun guestIdentityDao(): GuestIdentityDao
     abstract fun invoiceDao(): InvoiceDao
     abstract fun paymentDao(): PaymentDao
     abstract fun foodDao(): FoodDao
@@ -105,6 +113,159 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS guest_vehicles (
+                        vehicleId TEXT NOT NULL,
+                        bookingId TEXT NOT NULL,
+                        guestId TEXT,
+                        registrationNumber TEXT NOT NULL,
+                        vehicleType TEXT NOT NULL,
+                        makeModel TEXT NOT NULL,
+                        color TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        PRIMARY KEY(vehicleId)
+                    )
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_vehicles_bookingId
+                    ON guest_vehicles(bookingId)
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_vehicles_guestId
+                    ON guest_vehicles(guestId)
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_vehicles_registrationNumber
+                    ON guest_vehicles(registrationNumber)
+                """.trimIndent())
+
+                /*
+                 * Preserve the legacy BookingGuest.vehicleNumbers field.
+                 *
+                 * We intentionally do not delete or rewrite that column.
+                 * Existing data remains available for compatibility while
+                 * the new relational vehicle table becomes the source of
+                 * truth for newly managed vehicles.
+                 *
+                 * SQLite does not provide a safe built-in split operation
+                 * for arbitrary comma-separated values, so legacy values
+                 * are migrated conservatively as one vehicle record per
+                 * non-empty legacy value when possible.
+                 */
+                val cursor = db.query("""
+                    SELECT guestId, bookingId, vehicleNumbers
+                    FROM booking_guests
+                    WHERE vehicleNumbers IS NOT NULL
+                      AND TRIM(vehicleNumbers) != ''
+                """.trimIndent())
+
+                cursor.use {
+                    val guestIdIndex = it.getColumnIndexOrThrow("guestId")
+                    val bookingIdIndex = it.getColumnIndexOrThrow("bookingId")
+                    val vehiclesIndex = it.getColumnIndexOrThrow("vehicleNumbers")
+
+                    while (it.moveToNext()) {
+                        val guestId = it.getString(guestIdIndex)
+                        val bookingId = it.getString(bookingIdIndex)
+                        val rawVehicles = it.getString(vehiclesIndex)
+
+                        rawVehicles
+                            .split(",", ";", "\n")
+                            .map { value -> value.trim() }
+                            .filter { value -> value.isNotEmpty() }
+                            .distinct()
+                            .forEachIndexed { index, registration ->
+                                val vehicleId =
+                                    "LEGACY-${bookingId}-${guestId}-${index + 1}"
+
+                                db.execSQL(
+                                    """
+                                    INSERT OR IGNORE INTO guest_vehicles
+                                    (
+                                        vehicleId,
+                                        bookingId,
+                                        guestId,
+                                        registrationNumber,
+                                        vehicleType,
+                                        makeModel,
+                                        color,
+                                        createdAt,
+                                        updatedAt
+                                    )
+                                    VALUES (?, ?, ?, ?, '', '', '', ?, ?)
+                                    """.trimIndent(),
+                                    arrayOf(
+                                        vehicleId,
+                                        bookingId,
+                                        guestId,
+                                        registration,
+                                        System.currentTimeMillis(),
+                                        System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                    }
+                }
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS guest_identities (
+                        identityId TEXT NOT NULL,
+                        bookingId TEXT NOT NULL,
+                        guestId TEXT NOT NULL,
+                        idType TEXT NOT NULL,
+                        idNumber TEXT NOT NULL,
+                        frontPhotoUri TEXT NOT NULL,
+                        backPhotoUri TEXT NOT NULL,
+                        ocrName TEXT NOT NULL,
+                        ocrDateOfBirth TEXT NOT NULL,
+                        ocrGender TEXT NOT NULL,
+                        ocrAddress TEXT NOT NULL,
+                        ocrFatherName TEXT NOT NULL,
+                        ocrNationality TEXT NOT NULL,
+                        ocrExpiryDate TEXT NOT NULL,
+                        ocrRawText TEXT NOT NULL,
+                        ocrConfidence REAL NOT NULL,
+                        isOcrVerified INTEGER NOT NULL,
+                        verifiedBy TEXT NOT NULL,
+                        verifiedAt INTEGER,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        PRIMARY KEY(identityId)
+                    )
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_identities_bookingId
+                    ON guest_identities(bookingId)
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_identities_guestId
+                    ON guest_identities(guestId)
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_identities_idType
+                    ON guest_identities(idType)
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS index_guest_identities_idNumber
+                    ON guest_identities(idNumber)
+                """.trimIndent())
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -116,7 +277,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "hotel_billing_database.db"
                 )
                     .fallbackToDestructiveMigration(false)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .addCallback(DatabaseCallback(context))
                     .build()
                 INSTANCE = instance
