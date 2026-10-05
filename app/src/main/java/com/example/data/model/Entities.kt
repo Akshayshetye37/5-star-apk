@@ -25,6 +25,7 @@ data class HotelSettings(
     val driveFolderUri: String = "",
     val backupSensitiveData: Boolean = true,
     val upiPayeeName: String = "Hotel Billing System",
+    val upiPaymentAnnouncementEnabled: Boolean = false,
     val currencySymbol: String = "₹",
     val currencyCode: String = "INR",
     val invoicePrefix: String = "INV-",
@@ -74,7 +75,10 @@ data class RoomEntity(
     val status: String = "AVAILABLE", // AVAILABLE, OCCUPIED, RESERVED, MAINTENANCE
     val notes: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val version: Int = 1,
+    val lastModifiedTimestamp: Long = System.currentTimeMillis(),
+    val deviceId: String = ""
 )
 
 /**
@@ -268,7 +272,10 @@ data class Payment(
     val paymentMethod: String = "Cash", // Cash, UPI, Google Pay, Card, Bank Transfer, Other
     val referenceNumber: String = "",
     val notes: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val version: Int = 1,
+    val lastModifiedTimestamp: Long = System.currentTimeMillis(),
+    val deviceId: String = ""
 )
 
 /**

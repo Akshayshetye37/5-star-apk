@@ -12,6 +12,9 @@ import com.example.data.dao.BookingDao
 import com.example.data.dao.BookingGuestDao
 import com.example.data.dao.GuestVehicleDao
 import com.example.data.dao.GuestIdentityDao
+import com.example.data.dao.FinanceTransactionDao
+import com.example.data.dao.FolioChargeDao
+import com.example.data.dao.FolioDao
 import com.example.data.dao.CustomerDao
 import com.example.data.dao.ExpenseDao
 import com.example.data.dao.FoodDao
@@ -28,6 +31,9 @@ import com.example.data.model.Customer
 import com.example.data.model.Expense
 import com.example.data.model.GuestVehicle
 import com.example.data.model.GuestIdentity
+import com.example.data.model.FinanceTransaction
+import com.example.data.model.Folio
+import com.example.data.model.FolioCharge
 import com.example.data.model.FoodItem
 import com.example.data.model.FoodOrder
 import com.example.data.model.HotelSettings
@@ -57,11 +63,159 @@ import kotlinx.coroutines.launch
         BackupMetadata::class,
         BookingGuest::class,
         GuestVehicle::class,
-        GuestIdentity::class
+        GuestIdentity::class,
+        Folio::class,
+        FolioCharge::class,
+        FinanceTransaction::class
     ],
-    version = 5,
+    version = 7,
     exportSchema = false
 )
+private val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS folios (
+                folioId TEXT NOT NULL,
+                bookingId TEXT NOT NULL,
+                status TEXT NOT NULL,
+                currencyCode TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                lastModifiedTimestamp INTEGER NOT NULL,
+                deviceId TEXT NOT NULL,
+                createdAt INTEGER NOT NULL,
+                updatedAt INTEGER NOT NULL,
+                PRIMARY KEY(folioId)
+            )
+        """.trimIndent())
+
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_folios_bookingId ON folios(bookingId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folios_status ON folios(status)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folios_updatedAt ON folios(updatedAt)"
+        )
+
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS folio_charges (
+                chargeId TEXT NOT NULL,
+                folioId TEXT NOT NULL,
+                bookingId TEXT NOT NULL,
+                chargeType TEXT NOT NULL,
+                sourceId TEXT NOT NULL,
+                description TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                unitPrice REAL NOT NULL,
+                grossAmount REAL NOT NULL,
+                discountAmount REAL NOT NULL,
+                taxAmount REAL NOT NULL,
+                netAmount REAL NOT NULL,
+                occurredAt INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL,
+                updatedAt INTEGER NOT NULL,
+                lastModifiedTimestamp INTEGER NOT NULL,
+                deviceId TEXT NOT NULL,
+                PRIMARY KEY(chargeId)
+            )
+        """.trimIndent())
+
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folio_charges_folioId ON folio_charges(folioId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folio_charges_bookingId ON folio_charges(bookingId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folio_charges_chargeType ON folio_charges(chargeType)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_folio_charges_createdAt ON folio_charges(createdAt)"
+        )
+
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS finance_transactions (
+                transactionId TEXT NOT NULL,
+                paymentId TEXT,
+                bookingId TEXT NOT NULL,
+                folioId TEXT NOT NULL,
+                transactionType TEXT NOT NULL,
+                paymentMethod TEXT NOT NULL,
+                amount REAL NOT NULL,
+                debitAccount TEXT NOT NULL,
+                creditAccount TEXT NOT NULL,
+                referenceNumber TEXT NOT NULL,
+                description TEXT NOT NULL,
+                transactionTimestamp INTEGER NOT NULL,
+                createdAt INTEGER NOT NULL,
+                deviceId TEXT NOT NULL,
+                lastModifiedTimestamp INTEGER NOT NULL,
+                PRIMARY KEY(transactionId)
+            )
+        """.trimIndent())
+
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_finance_transactions_paymentId ON finance_transactions(paymentId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_finance_transactions_bookingId ON finance_transactions(bookingId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_finance_transactions_folioId ON finance_transactions(folioId)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_finance_transactions_transactionType ON finance_transactions(transactionType)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_finance_transactions_transactionTimestamp ON finance_transactions(transactionTimestamp)"
+        )
+
+        /*
+         * Existing data gets safe defaults.
+         * Existing Booking/Invoice financial values are deliberately NOT
+         * rewritten here; the reconciliation/backfill use case will create
+         * authoritative FolioCharge records in a controlled transaction.
+         */
+        db.execSQL(
+            "ALTER TABLE rooms ADD COLUMN version INTEGER NOT NULL DEFAULT 1"
+        )
+        db.execSQL(
+            "ALTER TABLE rooms ADD COLUMN lastModifiedTimestamp INTEGER NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            "ALTER TABLE rooms ADD COLUMN deviceId TEXT NOT NULL DEFAULT ''"
+        )
+
+        db.execSQL(
+            "UPDATE rooms SET lastModifiedTimestamp = updatedAt WHERE lastModifiedTimestamp = 0"
+        )
+
+        db.execSQL(
+            "ALTER TABLE payments ADD COLUMN version INTEGER NOT NULL DEFAULT 1"
+        )
+        db.execSQL(
+            "ALTER TABLE payments ADD COLUMN lastModifiedTimestamp INTEGER NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            "ALTER TABLE payments ADD COLUMN deviceId TEXT NOT NULL DEFAULT ''"
+        )
+
+        db.execSQL(
+            "UPDATE payments SET lastModifiedTimestamp = COALESCE(createdAt, date) WHERE lastModifiedTimestamp = 0"
+        )
+    }
+}
+
+
+private val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE hotel_settings ADD COLUMN upiPaymentAnnouncementEnabled INTEGER NOT NULL DEFAULT 0"
+        )
+    }
+}
+
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun hotelSettingsDao(): HotelSettingsDao
@@ -72,6 +226,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun bookingGuestDao(): BookingGuestDao
     abstract fun guestVehicleDao(): GuestVehicleDao
     abstract fun guestIdentityDao(): GuestIdentityDao
+    abstract fun folioDao(): FolioDao
+    abstract fun folioChargeDao(): FolioChargeDao
+    abstract fun financeTransactionDao(): FinanceTransactionDao
     abstract fun invoiceDao(): InvoiceDao
     abstract fun paymentDao(): PaymentDao
     abstract fun foodDao(): FoodDao
@@ -277,7 +434,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "hotel_billing_database.db"
                 )
                     .fallbackToDestructiveMigration(false)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .addCallback(DatabaseCallback(context))
                     .build()
                 INSTANCE = instance

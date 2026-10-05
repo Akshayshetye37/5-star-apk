@@ -20,6 +20,7 @@ import com.example.data.model.InvoiceItem
 import com.example.data.model.Payment
 import com.example.data.model.Reservation
 import com.example.data.model.RoomEntity
+import com.example.data.domain.PaymentEngineResult
 import com.example.data.repository.FullDatabaseExport
 import com.example.data.repository.HotelRepository
 import com.example.util.BackupRestoreManager
@@ -514,6 +515,87 @@ class HotelViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // --- Payments ---
+
+    /**
+     * New authoritative payment entry point.
+     *
+     * IMPORTANT:
+     * verified must only be true when the payment has been
+     * confirmed by a trusted provider/reconciliation mechanism.
+     *
+     * QR display, opening Google Pay/PhonePe/Paytm, returning
+     * from the payment application, screenshots, or manually
+     * typed UTR values are NOT payment verification.
+     */
+    fun recordVerifiedPayment(
+        payment: Payment,
+        folioId: String,
+        requestUuid: String = UUID.randomUUID().toString(),
+        verified: Boolean,
+        onResult: ((PaymentEngineResult) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                val result = repository.recordVerifiedPayment(
+                    bookingId = payment.bookingId,
+                    folioId = folioId,
+                    amount = payment.amount,
+                    paymentMethod = payment.paymentMethod,
+                    referenceNumber = payment.referenceNumber,
+                    requestUuid = requestUuid,
+                    verified = verified,
+                    customerId = payment.customerId,
+                    customerName = payment.customerName,
+                    invoiceId = payment.invoiceId,
+                    notes = payment.notes,
+                    timestamp = payment.date
+                )
+
+                when (result) {
+                    is PaymentEngineResult.Success -> {
+                        showMessage(
+                            "Payment of ${payment.amount} recorded successfully."
+                        )
+                    }
+
+                    is PaymentEngineResult.AlreadyProcessed -> {
+                        showMessage(
+                            "Payment was already processed."
+                        )
+                    }
+
+                    is PaymentEngineResult.Rejected -> {
+                        showMessage(
+                            "Payment rejected: ${result.reason}"
+                        )
+                    }
+                }
+
+                onResult?.invoke(result)
+
+            } catch (error: Exception) {
+                showMessage(
+                    "Payment failed: ${error.message ?: "Unknown error"}"
+                )
+
+                onResult?.invoke(
+                    PaymentEngineResult.Rejected(
+                        error.message ?: "Unknown payment error"
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Legacy compatibility path.
+     *
+     * Existing screens may still call this until they are migrated
+     * to recordVerifiedPayment().
+     *
+     * It is intentionally NOT considered verified and therefore
+     * cannot trigger the UPI payment announcement.
+     */
     fun recordPayment(payment: Payment) {
         viewModelScope.launch {
             repository.recordPayment(payment)

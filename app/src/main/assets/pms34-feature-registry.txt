@@ -1,0 +1,37 @@
+AURELIA PMS — 34 POINT IMPLEMENTATION TARGET
+Payment announcement is pre-existing and intentionally preserved.
+
+01 Front Desk / PMS
+02 Reservations
+03 Rooms
+04 Room Types & Rates
+05 Guest Management
+06 ID / OCR
+07 Housekeeping
+08 Maintenance
+09 Restaurant / POS
+10 Kitchen / KDS
+11 Room Service
+12 Inventory
+13 Purchasing / Suppliers
+14 Cashier / Shifts
+15 Folio / Billing
+16 Payments
+17 Finance / Ledger
+18 Invoice
+19 Night Audit
+20 Revenue Management
+21 Loyalty / VIP
+22 Staff / Roles
+23 Audit Log
+24 Communications
+25 Automation Engine
+26 Backup / Restore
+27 Reports
+28 Import / Export
+29 Settings / Modular Toggles
+30 Relational Database
+31 Clean Architecture
+32 Transactional Checkout
+33 Transactional Cleaning
+34 Performance / Offline Reliability

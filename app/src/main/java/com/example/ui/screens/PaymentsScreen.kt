@@ -73,6 +73,7 @@ import com.example.util.GuestRoomPdfGenerator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 @Composable
 fun PaymentsScreen(
@@ -246,9 +247,21 @@ fun PaymentsScreen(
             activeBookings = activeBookings,
             currencySymbol = settings.currencySymbol,
             onDismiss = { showAddDialog = false },
-            onSave = { p ->
-                viewModel.recordPayment(p)
-                showAddDialog = false
+            onSave = { payment, folioId, requestUuid, verified ->
+                viewModel.recordVerifiedPayment(
+                    payment = payment,
+                    folioId = folioId,
+                    requestUuid = requestUuid,
+                    verified = verified
+                ) { result ->
+                    when (result) {
+                        is com.example.data.domain.PaymentEngineResult.Success,
+                        is com.example.data.domain.PaymentEngineResult.AlreadyProcessed -> {
+                            showAddDialog = false
+                        }
+                        is com.example.data.domain.PaymentEngineResult.Rejected -> Unit
+                    }
+                }
             }
         )
     }
@@ -316,80 +329,284 @@ fun RecordPaymentDialog(
     activeBookings: List<com.example.data.model.Booking>,
     currencySymbol: String,
     onDismiss: () -> Unit,
-    onSave: (Payment) -> Unit
+    onSave: (
+        Payment,
+        String,
+        String,
+        Boolean
+    ) -> Unit,
+    onCompleted: () -> Unit
 ) {
-    var selectedBooking by remember { mutableStateOf(activeBookings.firstOrNull()) }
-    var amountText by remember { mutableStateOf(if (selectedBooking != null) selectedBooking!!.pending.toString() else "") }
-    var paymentMethod by remember { mutableStateOf("UPI") }
-    var referenceNumber by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
+    var selectedBooking by remember {
+        mutableStateOf(activeBookings.firstOrNull())
+    }
 
-    var isMethodExpanded by remember { mutableStateOf(false) }
-    var isBookingExpanded by remember { mutableStateOf(false) }
+    var amountText by remember {
+        mutableStateOf(
+            activeBookings.firstOrNull()?.pending?.toString() ?: ""
+        )
+    }
+
+    var paymentMethod by remember {
+        mutableStateOf("UPI")
+    }
+
+    var referenceNumber by remember {
+        mutableStateOf("")
+    }
+
+    var notes by remember {
+        mutableStateOf("")
+    }
+
+    var paymentVerified by remember {
+        mutableStateOf(false)
+    }
+
+    var isSubmitting by remember {
+        mutableStateOf(false)
+    }
+
+    var isMethodExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var isBookingExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    val requiresReference =
+        paymentMethod == "UPI" ||
+            paymentMethod == "Google Pay"
+
+    val amount =
+        amountText.toDoubleOrNull() ?: 0.0
+
+    val pendingAmount =
+        selectedBooking?.pending ?: 0.0
+
+    val amountValid =
+        selectedBooking != null &&
+            amount > 0.0 &&
+            amount <= pendingAmount + 0.000001
+
+    val referenceValid =
+        !requiresReference ||
+            referenceNumber.trim().isNotEmpty()
+
+    val canSubmit =
+        selectedBooking != null &&
+            amountValid &&
+            referenceValid &&
+            paymentVerified &&
+            !isSubmitting
 
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Record Payment", fontWeight = FontWeight.Bold) },
+        onDismissRequest = {
+            if (!isSubmitting) {
+                onDismiss()
+            }
+        },
+        title = {
+            Text(
+                "Record Verified Payment",
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // Booking selection
-                Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                verticalArrangement =
+                    Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                ) {
                     OutlinedTextField(
-                        value = selectedBooking?.let { "Room ${it.roomNumber} — ${it.customerName} (Due: $currencySymbol ${it.pending})" } ?: "Select Booking",
+                        value = selectedBooking?.let {
+                            "Room ${it.roomNumber} — " +
+                                "${it.customerName} " +
+                                "(Due: $currencySymbol ${
+                                    String.format(
+                                        Locale.US,
+                                        "%.2f",
+                                        it.pending
+                                    )
+                                })"
+                        } ?: "Select Booking",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Select Booking") },
+                        label = {
+                            Text("Select Booking")
+                        },
                         trailingIcon = {
-                            IconButton(onClick = { isBookingExpanded = true }) {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            IconButton(
+                                onClick = {
+                                    if (!isSubmitting) {
+                                        isBookingExpanded = true
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = null
+                                )
                             }
                         },
-                        modifier = Modifier.fillMaxWidth().clickable { isBookingExpanded = true }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                enabled = !isSubmitting
+                            ) {
+                                isBookingExpanded = true
+                            }
                     )
-                    DropdownMenu(expanded = isBookingExpanded, onDismissRequest = { isBookingExpanded = false }) {
-                        activeBookings.forEach { b ->
-                            DropdownMenuItem(
-                                text = { Text("Room ${b.roomNumber} - ${b.customerName} (Pending: $currencySymbol ${b.pending})") },
-                                onClick = {
-                                    selectedBooking = b
-                                    amountText = b.pending.toString()
-                                    isBookingExpanded = false
-                                }
-                            )
+
+                    DropdownMenu(
+                        expanded = isBookingExpanded,
+                        onDismissRequest = {
+                            isBookingExpanded = false
                         }
+                    ) {
+                        activeBookings
+                            .filter {
+                                it.pending > 0.0
+                            }
+                            .forEach { booking ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            "Room ${booking.roomNumber} - " +
+                                                "${booking.customerName} " +
+                                                "(Pending: $currencySymbol ${
+                                                    String.format(
+                                                        Locale.US,
+                                                        "%.2f",
+                                                        booking.pending
+                                                    )
+                                                })"
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedBooking =
+                                            booking
+                                        amountText =
+                                            booking.pending.toString()
+                                        paymentVerified =
+                                            false
+                                        referenceNumber = ""
+                                        isBookingExpanded =
+                                            false
+                                    }
+                                )
+                            }
                     }
                 }
 
                 OutlinedTextField(
                     value = amountText,
-                    onValueChange = { amountText = it },
-                    label = { Text("Payment Amount ($currencySymbol) *") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    onValueChange = {
+                        if (!isSubmitting) {
+                            amountText = it
+                        }
+                    },
+                    label = {
+                        Text(
+                            "Payment Amount " +
+                                "($currencySymbol) *"
+                        )
+                    },
+                    keyboardOptions =
+                        KeyboardOptions(
+                            keyboardType =
+                                KeyboardType.Decimal
+                        ),
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = !isSubmitting,
+                    isError =
+                        amountText.isNotBlank() &&
+                            !amountValid
                 )
 
-                // Method selector
-                Box(modifier = Modifier.fillMaxWidth()) {
+                if (
+                    selectedBooking != null &&
+                    amount > pendingAmount
+                ) {
+                    Text(
+                        "Payment cannot exceed pending " +
+                            "balance of $currencySymbol ${
+                                String.format(
+                                    Locale.US,
+                                    "%.2f",
+                                    pendingAmount
+                                )
+                            }.",
+                        color = ErrorRed,
+                        fontSize = 12.sp
+                    )
+                }
+
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                ) {
                     OutlinedTextField(
                         value = paymentMethod,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Payment Method") },
+                        label = {
+                            Text("Payment Method")
+                        },
                         trailingIcon = {
-                            IconButton(onClick = { isMethodExpanded = true }) {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            IconButton(
+                                onClick = {
+                                    if (!isSubmitting) {
+                                        isMethodExpanded = true
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = null
+                                )
                             }
                         },
-                        modifier = Modifier.fillMaxWidth().clickable { isMethodExpanded = true }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                enabled = !isSubmitting
+                            ) {
+                                isMethodExpanded = true
+                            }
                     )
-                    DropdownMenu(expanded = isMethodExpanded, onDismissRequest = { isMethodExpanded = false }) {
-                        listOf("Cash", "UPI", "Google Pay", "Card", "Bank Transfer", "Other").forEach { m ->
+
+                    DropdownMenu(
+                        expanded = isMethodExpanded,
+                        onDismissRequest = {
+                            isMethodExpanded = false
+                        }
+                    ) {
+                        listOf(
+                            "Cash",
+                            "UPI",
+                            "Google Pay",
+                            "Card",
+                            "Bank Transfer",
+                            "Other"
+                        ).forEach { method ->
                             DropdownMenuItem(
-                                text = { Text(m) },
+                                text = {
+                                    Text(method)
+                                },
                                 onClick = {
-                                    paymentMethod = m
-                                    isMethodExpanded = false
+                                    paymentMethod =
+                                        method
+                                    paymentVerified =
+                                        false
+                                    isMethodExpanded =
+                                        false
                                 }
                             )
                         }
@@ -398,46 +615,176 @@ fun RecordPaymentDialog(
 
                 OutlinedTextField(
                     value = referenceNumber,
-                    onValueChange = { referenceNumber = it },
-                    label = { Text("UPI / Transaction Ref No.") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    onValueChange = {
+                        if (!isSubmitting) {
+                            referenceNumber = it
+                        }
+                    },
+                    label = {
+                        Text(
+                            if (requiresReference) {
+                                "UPI / Transaction Ref No. *"
+                            } else {
+                                "Transaction Ref No. " +
+                                    "(Optional)"
+                            }
+                        )
+                    },
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = !isSubmitting,
+                    isError =
+                        requiresReference &&
+                            referenceNumber
+                                .trim()
+                                .isEmpty()
                 )
 
                 OutlinedTextField(
                     value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text("Notes") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    onValueChange = {
+                        if (!isSubmitting) {
+                            notes = it
+                        }
+                    },
+                    label = {
+                        Text("Notes")
+                    },
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = !isSubmitting
                 )
+
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor =
+                            HotelNavy.copy(
+                                alpha = 0.06f
+                            )
+                    ),
+                    shape =
+                        RoundedCornerShape(10.dp),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier =
+                            Modifier.padding(12.dp),
+                        verticalArrangement =
+                            Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment =
+                                Alignment.CenterVertically
+                        ) {
+                            androidx.compose.material3.Checkbox(
+                                checked =
+                                    paymentVerified,
+                                onCheckedChange = {
+                                    if (!isSubmitting) {
+                                        paymentVerified =
+                                            it
+                                    }
+                                },
+                                enabled = !isSubmitting
+                            )
+
+                            Text(
+                                "I confirm this payment " +
+                                    "has been verified.",
+                                fontWeight =
+                                    FontWeight.Medium,
+                                color = Slate700
+                            )
+                        }
+
+                        Text(
+                            "Verification requires trusted " +
+                                "provider or reconciliation " +
+                                "confirmation. A QR scan, opening " +
+                                "a payment app, returning from the " +
+                                "app, screenshot, or manually entered " +
+                                "UTR does not by itself verify payment.",
+                            fontSize = 11.sp,
+                            color = Slate600
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val amount = amountText.toDoubleOrNull() ?: 0.0
-                    if (amount <= 0) return@Button
-                    val p = Payment(
-                        paymentId = "PAY-${SimpleDateFormat("yyMMdd-HHmmss", Locale.getDefault()).format(Date())}",
-                        bookingId = selectedBooking?.bookingId ?: "",
-                        customerId = selectedBooking?.customerId ?: "",
-                        customerName = selectedBooking?.customerName ?: "",
-                        amount = amount,
-                        date = System.currentTimeMillis(),
-                        paymentMethod = paymentMethod,
-                        referenceNumber = referenceNumber.trim(),
-                        notes = notes.trim()
+                    if (!canSubmit) {
+                        return@Button
+                    }
+
+                    val booking =
+                        selectedBooking
+                            ?: return@Button
+
+                    val timestamp =
+                        System.currentTimeMillis()
+
+                    val requestUuid =
+                        UUID.randomUUID().toString()
+
+                    val payment =
+                        Payment(
+                            paymentId =
+                                "CLIENT-$requestUuid",
+                            bookingId =
+                                booking.bookingId,
+                            customerId =
+                                booking.customerId,
+                            customerName =
+                                booking.customerName,
+                            amount = amount,
+                            date = timestamp,
+                            paymentMethod =
+                                paymentMethod,
+                            referenceNumber =
+                                referenceNumber.trim(),
+                            notes =
+                                notes.trim()
+                        )
+
+                    val folioId =
+                        "FOLIO-${booking.bookingId}"
+
+                    isSubmitting = true
+
+                    onSave(
+                        payment,
+                        folioId,
+                        requestUuid,
+                        paymentVerified
                     )
-                    onSave(p)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = HotelNavy)
+                enabled = canSubmit,
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = HotelNavy
+                    )
             ) {
-                Text("Record Payment")
+                Text(
+                    if (isSubmitting) {
+                        "Recording..."
+                    } else {
+                        "Record Verified Payment"
+                    }
+                )
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+            OutlinedButton(
+                onClick = onDismiss,
+                enabled = !isSubmitting
+            ) {
+                Text("Cancel")
+            }
         }
     )
 }

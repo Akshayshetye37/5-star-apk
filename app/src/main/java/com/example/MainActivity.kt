@@ -12,6 +12,7 @@ import com.example.ui.HotelApp
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.viewmodel.HotelViewModel
 import com.example.util.AppPreferences
+import com.example.domain.upi.UpiPaymentAnnouncementManager
 
 class MainActivity : ComponentActivity() {
 
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        UpiPaymentAnnouncementManager.initialize(this)
         if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 4101)
         }
@@ -31,5 +33,10 @@ class MainActivity : ComponentActivity() {
                 HotelApp(viewModel = viewModel)
             }
         }
+    }
+
+    override fun onDestroy() {
+        UpiPaymentAnnouncementManager.shutdown()
+        super.onDestroy()
     }
 }

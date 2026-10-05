@@ -94,6 +94,9 @@ fun SettingsScreen(
     var gstNumber by remember(currentSettings) { mutableStateOf(currentSettings.gstNumber) }
     var upiId by remember(currentSettings) { mutableStateOf(currentSettings.upiId) }
     var upiPayeeName by remember(currentSettings) { mutableStateOf(currentSettings.upiPayeeName) }
+    var upiPaymentAnnouncementEnabled by remember(currentSettings) {
+        mutableStateOf(currentSettings.upiPaymentAnnouncementEnabled)
+    }
     var currencySymbol by remember(currentSettings) { mutableStateOf(currentSettings.currencySymbol) }
     var invoicePrefix by remember(currentSettings) { mutableStateOf(currentSettings.invoicePrefix) }
     var invoiceFooter by remember(currentSettings) { mutableStateOf(currentSettings.invoiceFooter) }
@@ -300,6 +303,31 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "UPI Payment Announcement",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                color = Slate800
+                            )
+                            Text(
+                                "Announce the verified received amount after payment confirmation.",
+                                fontSize = 12.sp,
+                                color = Slate500
+                            )
+                        }
+                        Switch(
+                            checked = upiPaymentAnnouncementEnabled,
+                            onCheckedChange = { upiPaymentAnnouncementEnabled = it }
+                        )
+                    }
+
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -642,6 +670,7 @@ fun SettingsScreen(
                         gstNumber = gstNumber.trim(),
                         upiId = upiId.trim(),
                         upiPayeeName = upiPayeeName.trim(),
+                        upiPaymentAnnouncementEnabled = upiPaymentAnnouncementEnabled,
                         currencySymbol = currencySymbol.trim(),
                         invoicePrefix = invoicePrefix.trim(),
                         invoiceFooter = invoiceFooter.trim(),

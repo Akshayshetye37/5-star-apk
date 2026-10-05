@@ -300,7 +300,13 @@ interface PaymentDao {
     @Query("SELECT * FROM payments WHERE bookingId = :bookingId")
     suspend fun getPaymentsForBookingDirect(bookingId: String): List<Payment>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Query("SELECT * FROM payments WHERE bookingId = :bookingId ORDER BY date DESC")
+    suspend fun getPaymentsForBookingDirectOrdered(bookingId: String): List<Payment>
+
+    @Query("SELECT * FROM payments WHERE paymentId = :paymentId LIMIT 1")
+    suspend fun getPaymentById(paymentId: String): Payment?
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertPayment(payment: Payment)
 
     @Update

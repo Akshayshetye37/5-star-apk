@@ -1,0 +1,45 @@
+AURELIA PMS 34-POINT WIRING CHECKLIST
+
+The following integration boundaries are present:
+01 front_desk
+02 reservations
+03 rooms
+04 room_types_rates
+05 guests
+06 id_ocr
+07 housekeeping
+08 maintenance
+09 pos
+10 kds
+11 room_service
+12 inventory
+13 purchasing
+14 cashier
+15 folio
+16 payments
+17 finance
+18 invoice
+19 night_audit
+20 revenue
+21 loyalty
+22 staff
+23 audit
+24 communications
+25 automation
+26 backup
+27 reports
+28 import_export
+29 settings
+30 database
+31 architecture
+32 checkout
+33 cleaning
+34 offline_performance
+
+PAYMENT ANNOUNCEMENT:
+Existing implementation is preserved and is NOT replaced by this pass.
+
+IMPORTANT:
+The integration contract is intentionally an adapter boundary. It must be bound
+to the existing HotelRepository/HotelDatabase rather than creating a duplicate
+in-memory database. Existing UI modules should invoke the adapter/use-cases.

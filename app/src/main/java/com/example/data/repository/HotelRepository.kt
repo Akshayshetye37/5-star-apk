@@ -16,10 +16,18 @@ import com.example.data.model.InvoiceItem
 import com.example.data.model.Payment
 import com.example.data.model.Reservation
 import com.example.data.model.RoomEntity
+import com.example.data.model.Folio
+import com.example.data.model.FolioCharge
+import com.example.data.model.FinanceTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import com.example.data.dao.FolioDao
+import com.example.data.dao.FolioChargeDao
+import com.example.data.dao.FinanceTransactionDao
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import com.example.data.usecase.GetLedgerBalanceUseCase
+import com.example.data.usecase.RecordVerifiedPaymentUseCase
 
 class HotelRepository(private val database: AppDatabase) {
 
@@ -31,6 +39,20 @@ class HotelRepository(private val database: AppDatabase) {
     private val bookingGuestDao = database.bookingGuestDao()
     private val invoiceDao = database.invoiceDao()
     private val paymentDao = database.paymentDao()
+    private val folioDao = database.folioDao()
+    private val folioChargeDao = database.folioChargeDao()
+    private val financeTransactionDao = database.financeTransactionDao()
+    private val ledgerBalanceUseCase = GetLedgerBalanceUseCase(
+        folioDao = folioDao,
+        folioChargeDao = folioChargeDao,
+        paymentDao = paymentDao
+    )
+
+    private val recordVerifiedPaymentUseCase =
+        RecordVerifiedPaymentUseCase(
+            database = database,
+            ledgerBalanceUseCase = ledgerBalanceUseCase
+        )
     private val foodDao = database.foodDao()
     private val expenseDao = database.expenseDao()
     private val appSectionDao = database.appSectionDao()
@@ -372,6 +394,43 @@ class HotelRepository(private val database: AppDatabase) {
 
     suspend fun getPaymentsForBookingDirect(bookingId: String): List<Payment> = withContext(Dispatchers.IO) {
         paymentDao.getPaymentsForBookingDirect(bookingId)
+    }
+
+    /**
+     * New authoritative payment entry point.
+     *
+     * The legacy recordPayment() below remains temporarily available
+     * for existing UI compatibility. New verified-payment flows must
+     * use this method.
+     */
+    suspend fun recordVerifiedPayment(
+        bookingId: String,
+        folioId: String,
+        amount: Double,
+        paymentMethod: String,
+        referenceNumber: String = "",
+        requestUuid: String,
+        verified: Boolean,
+        customerId: String = "",
+        customerName: String = "",
+        invoiceId: String = "",
+        notes: String = "",
+        timestamp: Long = System.currentTimeMillis()
+    ) = withContext(Dispatchers.IO) {
+        recordVerifiedPaymentUseCase(
+            bookingId = bookingId,
+            folioId = folioId,
+            amount = amount,
+            paymentMethod = paymentMethod,
+            referenceNumber = referenceNumber,
+            requestUuid = requestUuid,
+            verified = verified,
+            customerId = customerId,
+            customerName = customerName,
+            invoiceId = invoiceId,
+            notes = notes,
+            timestamp = timestamp
+        )
     }
 
     suspend fun recordPayment(payment: Payment) = withContext(Dispatchers.IO) {
