@@ -1,0 +1,193 @@
+{
+  "total": 34,
+  "rule": "FULL_ONLY",
+  "modules": [
+    {
+      "number": 1,
+      "name": "Front Desk / PMS",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 2,
+      "name": "Reservations",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 3,
+      "name": "Rooms",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 4,
+      "name": "Room Types & Rates",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 5,
+      "name": "Guest Management",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 6,
+      "name": "ID / OCR",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 7,
+      "name": "Housekeeping",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 8,
+      "name": "Maintenance",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 9,
+      "name": "Restaurant / POS",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 10,
+      "name": "Kitchen / KDS",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 11,
+      "name": "Room Service",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 12,
+      "name": "Inventory",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 13,
+      "name": "Purchasing / Suppliers",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 14,
+      "name": "Cashier / Shifts",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 15,
+      "name": "Folio / Billing",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 16,
+      "name": "Payments",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 17,
+      "name": "Finance / Ledger",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 18,
+      "name": "Invoice",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 19,
+      "name": "Night Audit",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 20,
+      "name": "Revenue Management",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 21,
+      "name": "Loyalty / VIP",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 22,
+      "name": "Staff / Roles",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 23,
+      "name": "Audit Log",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 24,
+      "name": "Communications",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 25,
+      "name": "Automation Engine",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 26,
+      "name": "Backup / Restore",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 27,
+      "name": "Reports",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 28,
+      "name": "Import / Export",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 29,
+      "name": "Settings / Modular Toggles",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 30,
+      "name": "Relational Room Database",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 31,
+      "name": "Clean Architecture",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 32,
+      "name": "Transactional Checkout",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 33,
+      "name": "Transactional Cleaning",
+      "status": "MUST_VERIFY"
+    },
+    {
+      "number": 34,
+      "name": "Performance / Offline Reliability",
+      "status": "MUST_VERIFY"
+    }
+  ],
+  "xlsx": {
+    "max_rows": null,
+    "example_rows": 135,
+    "must_preserve_row_photo_mapping": true,
+    "must_report_row_and_photo_failures": true
+  },
+  "invoice": {
+    "pending_invoice_primary_guest": true,
+    "checkout_pdf_all_guests": true,
+    "historical_snapshot": true
+  },
+  "whatsapp": {
+    "generate_message": true,
+    "editable_text_box": true,
+    "open_guest_number": true,
+    "silent_send": false
+  }
+}
