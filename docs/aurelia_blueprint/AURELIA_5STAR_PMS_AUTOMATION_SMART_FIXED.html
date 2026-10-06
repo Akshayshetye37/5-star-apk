@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aurelia 5★ Hotel PMS — Functional Sea Breeze</title>
+<style>
+:root{
+  --brand:#0e9c9c;--brand2:#14b8a6;--ink:#123842;--muted:#6b8084;
+  --bg:#eef9f8;--card:#fff;--line:#d8e8e7;--soft:#e3f7f5;--danger:#c94d4d;
+  --warn:#b77b13;--ok:#278a61;--shadow:0 12px 30px rgba(20,70,75,.08);
+  --radius:22px;
+}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-style:italic}
+.app{min-height:100vh;display:flex}
+.sidebar{width:250px;background:#fff;border-right:1px solid var(--line);position:fixed;inset:0 auto 0 0;padding:22px 14px;z-index:30}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 10px 20px}.logo{width:48px;height:48px;border-radius:15px;object-fit:cover;border:1px solid var(--line);background:var(--soft)}.brand strong{font-family:Georgia,serif;font-style:italic;font-size:20px}
+.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;text-align:left;padding:12px 13px;border-radius:14px;color:var(--ink);font-weight:600}.nav button.active{background:var(--soft);color:#086f73}.nav button:hover{background:#f2fbfa}
+.main{margin-left:250px;flex:1;min-width:0}.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 24px}
+.toprow{display:flex;gap:12px;align-items:center}.mobile-menu{display:none}
+.search{flex:1;position:relative}.search input{width:100%;height:50px;border:1px solid var(--line);border-radius:17px;padding:0 18px;background:#f9fdfd;outline:none}.search input:focus{border-color:var(--brand)}
+.search-results{position:absolute;left:0;right:0;top:56px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:none;max-height:430px;overflow:auto}.search-results.show{display:block}.sr-group{padding:10px 14px 4px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.sr{padding:11px 14px;border-top:1px solid #edf4f3}.sr:hover{background:#f4fbfa}.sr b{display:block}.sr small{color:var(--muted)}
+.iconbtn{width:46px;height:46px;border:1px solid var(--line);background:#fff;border-radius:15px}
+.content{padding:24px;max-width:1400px;margin:auto}.hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:18px}.hero h1{font-size:38px;margin:0 0 5px}.hero p{margin:0;color:var(--muted)}
+.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:12px 16px;font-weight:700}.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:0;box-shadow:0 8px 20px rgba(14,156,156,.2)}.btn.danger{color:var(--danger)}.btn.small{padding:8px 11px;border-radius:11px;font-size:13px}
+.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(6,minmax(0,1fr))}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.kpi .label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.kpi .value{font-size:27px;font-weight:800;margin:8px 0 3px}.kpi small{color:var(--muted)}
+.two{grid-template-columns:1.4fr 1fr}.three{grid-template-columns:repeat(3,1fr)}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 12px}.section-title h2{margin:0;font-size:26px}
+.attention{display:grid;gap:9px}.alert{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fbfefe}.alert.warn{border-color:#f0dfb8}.alert.danger{border-color:#f2c7c7}
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.room{border:1px solid var(--line);border-radius:18px;padding:15px;background:#fff}.room .num{font-size:24px;font-weight:800}.status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800;margin-top:8px}.available{background:#e6f7ee;color:#237451}.occupied{background:#e2f4f6;color:#146b72}.reserved{background:#f3ebff;color:#7652a8}.cleaning{background:#fff3dc;color:#94620e}.maintenance{background:#fde7e7;color:#a73f3f}
+.list{display:grid;gap:11px}.item{border:1px solid var(--line);border-radius:18px;padding:15px;background:#fff}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.item h3{margin:0 0 4px;font-size:20px}.muted{color:var(--muted)}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.money{font-weight:800}.due{color:var(--danger)}.ok{color:var(--ok)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}.table{width:100%;border-collapse:collapse;min-width:760px}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{background:#eff9f8;color:#49686d;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.table tr:last-child td{border-bottom:0}
+.modal-back{position:fixed;inset:0;background:rgba(10,28,31,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal-back.show{display:flex}.modal{width:min(900px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:25px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.25);padding:22px}.modal h2{margin-top:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:13px;color:var(--muted);font-weight:700}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfefe;outline:none}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand)}
+.subcard{border:1px dashed #bfd8d6;border-radius:18px;padding:14px;margin-top:12px;background:#fbfefe}.subhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.photo{width:80px;height:80px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#eef7f6}
+.occupant,.vehicle{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}.danger-text{color:var(--danger)}
+.toast{position:fixed;right:18px;bottom:90px;z-index:150;background:#123842;color:#fff;padding:13px 16px;border-radius:14px;box-shadow:var(--shadow);display:none}.toast.show{display:block}
+.bottom{display:none}.more-menu{position:fixed;inset:auto 14px 82px 14px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.2);padding:10px;display:none;z-index:50}.more-menu.show{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.more-menu button{border:0;background:#f5fbfa;padding:12px;border-radius:12px;text-align:left}
+.report-box{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.report-box .btn{padding:10px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.logo-preview{display:flex;gap:12px;align-items:center}.logo-preview img{width:70px;height:70px;object-fit:cover;border-radius:18px;border:1px solid var(--line)}
+.check{display:flex;align-items:center;gap:9px}.check input{width:18px;height:18px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .sidebar{display:none}.main{margin-left:0;padding-bottom:74px}.top{padding:12px 14px}.mobile-menu{display:block}.content{padding:16px 14px}.hero{display:block}.hero h1{font-size:31px}.hero .actions{margin-top:14px}.kpis{grid-template-columns:repeat(2,1fr)}.card{padding:16px;border-radius:19px}.three{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+  .bottom{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:0;right:0;bottom:0;height:72px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:40;padding:6px 8px}.bottom button{border:0;background:transparent;border-radius:15px;color:#577176;font-size:11px;font-weight:700}.bottom button.active{background:var(--soft);color:#075f66}.bottom span{display:block;font-size:22px;line-height:25px}.search-results{top:53px}.report-box{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:430px){.kpis{gap:10px}.kpi .value{font-size:22px}.hero h1{font-size:28px}.room-grid{grid-template-columns:1fr}.actions .btn{flex:1;min-width:120px}.item-head{display:block}.item-head .actions{margin-top:10px}}
+
+/* ===== AURELIA 5★ FINAL CONTROL PATCH ===== */
+@keyframes aureliaBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.015)}}
+.top-alerts{display:flex;gap:8px;overflow:auto;padding:8px 0 0}
+.top-alert{flex:0 0 auto;border:1px solid #f0c6c6;background:#fff5f5;color:#a33b3b;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800;animation:aureliaBlink 1.2s infinite}
+.top-alert.inventory{border-color:#efd59d;background:#fff9e9;color:#95620b}
+.qr-box{margin-top:16px;border:1px dashed #b7d4d2;border-radius:18px;padding:14px;text-align:center;background:#fbfefe}
+.qr-box img{display:block;width:min(270px,80vw);height:min(270px,80vw);margin:8px auto;border-radius:12px;border:8px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.share-grid .btn{min-height:48px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.feature-row{border:1px solid var(--line);border-radius:14px;padding:11px;background:#fbfefe}
+.feature-row label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.feature-row small{display:block;color:var(--muted);margin-top:4px}
+.balance-good{color:var(--ok)}.balance-over{color:#8a5a0a}.balance-due{color:var(--danger)}
+.import-drop{border:2px dashed #b9d4d2;border-radius:18px;padding:24px;text-align:center;background:#fbfefe}
+@media(max-width:760px){.feature-grid{grid-template-columns:1fr 1fr}.share-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.feature-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><img id="brandLogo" class="logo" alt="Logo"><div><strong id="brandName">AURELIA 5★</strong><div class="muted" style="font-size:12px">Hotel PMS</div></div></div>
+  <nav class="nav" id="sideNav"></nav>
+</aside>
+
+<main class="main">
+<header class="top">
+  <div class="toprow">
+    <button class="iconbtn mobile-menu" onclick="toggleMore()">☰</button>
+    <div class="search"><input id="search" placeholder="Search guest, room, booking, reservation, invoice, ID, vehicle, POS…" autocomplete="off"><div id="searchResults" class="search-results"></div></div>
+    <button class="iconbtn" onclick="showPage('settings')">⚙</button>
+  </div>
+</header>
+
+<div class="content" id="appContent"></div>
+</main>
+</div>
+
+<nav class="bottom">
+  <button data-nav="dashboard" onclick="showPage('dashboard')"><span>⌂</span>Home</button>
+  <button data-nav="reservations" onclick="showPage('reservations')"><span>▣</span>Reserve</button>
+  <button data-nav="bookings" onclick="showPage('bookings')"><span>▰</span>Stays</button>
+  <button data-nav="folio" onclick="showPage('folio')"><span>₹</span>Folio</button>
+  <button onclick="toggleMore()"><span>•••</span>More</button>
+</nav>
+<div class="more-menu" id="moreMenu"></div>
+
+<div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MODULES=[
+ ['dashboard','Dashboard'],['reservations','Reservations'],['bookings','Bookings'],['guests','Guests'],['rooms','Rooms'],
+ ['folio','Folio / Dues'],['invoices','Invoices'],['housekeeping','Housekeeping'],['pos','POS / Food'],['expenses','Expenses'],
+ ['reports','Reports'],['audit','Audit'],['importExport','Import / Export'],['settings','Settings']
+];
+
+const seed={
+ settings:{features:{},hotelName:'AURELIA 5★ HOTEL',phone:'+91',address:'Hotel address',gst:'',upi:'hotel@upi',currency:'₹',paymentAnnouncement:true,logo:'',checkoutMessage:'Thank you for staying with us. We hope to welcome you again.',dueAlertHours:5},
+ rooms:[
+  {id:'r101',number:'101',type:'Standard',rate:3000,status:'available'},
+  {id:'r102',number:'102',type:'Deluxe',rate:4500,status:'occupied'},
+  {id:'r201',number:'201',type:'Suite',rate:5200,status:'available'},
+  {id:'r301',number:'301',type:'Standard',rate:3000,status:'reserved'}
+ ],
+ guests:[
+  {id:'g1',name:'Priya Deshmukh',phone:'919876543210',email:'',idType:'Passport',idNumber:'P-DEMO-01',idPhoto:'',occupants:[],vehicles:[{id:'v1',reg:'MH12AB1234',type:'Car',photo:''}]},
+  {id:'g2',name:'Arjun Malhotra',phone:'919812345678',email:'',idType:'Aadhaar',idNumber:'XXXX-XXXX-1234',idPhoto:'',occupants:[],vehicles:[]}
+ ],
+ bookings:[
+  {id:'b1',sr:'BKG-001001',guestId:'g1',roomId:'r102',checkIn:'2026-10-06T12:00',checkOut:'2026-10-08T11:00',guests:1,base:9000,discount:500,paid:9500,status:'active',charges:[
+    {id:'c1',item:'Room charges',qty:1,rate:9000,amount:9000,at:'2026-10-06T12:00'},
+    {id:'c2',item:'Water Bottle',qty:2,rate:30,amount:60,at:'2026-10-06T15:20'},
+    {id:'c3',item:'Pomfret',qty:1,rate:850,amount:850,at:'2026-10-06T19:05'}
+  ],payments:[{id:'p1',amount:9500,method:'UPI',status:'verified',at:'2026-10-06T20:00',ref:'TXN-DEMO-001'}]},
+  {id:'b2',sr:'BKG-001002',guestId:'g2',roomId:'r201',checkIn:'2026-10-06T14:00',checkOut:'2026-10-06T20:00',guests:1,base:10000,discount:0,paid:3000,status:'active',charges:[
+    {id:'c4',item:'Room charges',qty:1,rate:10000,amount:10000,at:'2026-10-06T14:00'}
+  ],payments:[{id:'p2',amount:3000,method:'Cash',status:'verified',at:'2026-10-06T14:10',ref:'CASH-001'}]}
+ ],
+ inventory:[
+  {id:'i1',name:'Water Bottle',unit:'bottle',opening:100,purchased:1000,issued:580,waste:20,sell:30,reorder:100},
+  {id:'i2',name:'Soap',unit:'piece',opening:50,purchased:0,issued:2,waste:0,sell:20,reorder:10},
+  {id:'i3',name:'Pomfret',unit:'piece',opening:20,purchased:0,issued:0,waste:0,sell:850,reorder:5}
+ ],
+ expenses:[{id:'e1',title:'Cleaning supplies',amount:500,category:'Operations',at:'2026-10-06T10:00',status:'active'}],
+ reservations:[{id:'res1',sr:'RES-000001',guestId:'g1',roomId:'r301',from:'2026-10-20T14:00',to:'2026-10-22T11:00',status:'confirmed'}],
+ audit:[{id:'a1',at:'2026-10-06T20:00',action:'Payment verified',detail:'₹9,500 · BKG-001001'}],
+ seq:{booking:1002,reservation:1,invoice:1,expense:2}
+};
+let DB=JSON.parse(localStorage.getItem('aurelia_pms_v3')||'null')||seed;
+DB.settings=DB.settings||{};DB.settings.features=DB.settings.features||{};feature_keys_placeholder=undefined;
+function save(){localStorage.setItem('aurelia_pms_v3',JSON.stringify(DB))}
+function money(n){return `${DB.settings.currency||'₹'}${Number(n||0).toLocaleString('en-IN')}`}
+function guest(b){return DB.guests.find(g=>g.id===b.guestId)}
+function room(b){return DB.rooms.find(r=>r.id===b.roomId)}
+function nightsBetween(a,b){const x=new Date(a),y=new Date(b);if(!a||!b||Number.isNaN(x)||Number.isNaN(y)||y<=x)return 1;return Math.max(1,Math.ceil((y-x)/86400000))}
+function bookingRoomAmount(roomId,checkIn,checkOut){const r=DB.rooms.find(x=>x.id===roomId);return Number(r?.rate||0)*nightsBetween(checkIn,checkOut)}
+function recalcBooking(b){if(!b)return 0;const r=room(b),n=nightsBetween(b.checkIn,b.checkOut),roomAmt=Number(r?.rate||b.base||0)*n;b.base=roomAmt;b.charges=b.charges||[];const roomCharge=b.charges.find(c=>c.item==='Room charges');if(roomCharge){roomCharge.qty=n;roomCharge.rate=Number(r?.rate||roomCharge.rate||0);roomCharge.amount=roomAmt}else b.charges.unshift({id:'c'+Date.now(),item:'Room charges',qty:n,rate:Number(r?.rate||0),amount:roomAmt,at:b.checkIn});return roomAmt}
+function total(b){return Math.max(0,(b.charges||[]).reduce((s,c)=>s+Number(c.amount||0),0)-Number(b.discount||0))}
+function due(b){return Math.max(0,total(b)-Number(b.paid||0))}
+function paymentStatus(b){const d=due(b);return d<=0?'PAID':Number(b.paid||0)>0?'PART PAID':'UNPAID'}
+function currentCycleTransactions(i){const start=new Date(i.cycleStartedAt||0).getTime();return DB.inventoryLedger.filter(t=>t.itemId===i.id&&new Date(t.at).getTime()>=start)}
+function remaining(i){const tx=currentCycleTransactions(i);return Math.max(0,Number(i.opening||0)+tx.filter(t=>t.type==='purchase').reduce((s,t)=>s+Number(t.qty||0),0)-tx.filter(t=>t.type==='sale').reduce((s,t)=>s+Number(t.qty||0),0)-tx.filter(t=>t.type==='waste').reduce((s,t)=>s+Number(t.qty||0),0))}
+function inventoryPeriodRange(period){const end=Date.now();let start=0;if(period==='Daily')start=end-86400000;else if(period==='Weekly')start=end-7*86400000;else if(period==='Monthly')start=end-30*86400000;else if(period==='Yearly')start=end-365*86400000;return {start,end,label:period}}
+function inventoryPeriodRows(period){const {start,end}=inventoryPeriodRange(period);return DB.inventoryLedger.filter(t=>{const tm=new Date(t.at).getTime();return tm>=start&&tm<=end&&(t.type==='purchase'||t.type==='sale'||t.type==='waste')})}
+function inventoryReport(period){const rows=period==='All Time'?DB.inventoryLedger.filter(t=>t.type==='purchase'||t.type==='sale'||t.type==='waste'):inventoryPeriodRows(period);const purchased=rows.filter(x=>x.type==='purchase').reduce((s,x)=>s+Number(x.amount||0),0),sales=rows.filter(x=>x.type==='sale').reduce((s,x)=>s+Number(x.amount||0),0),qtyPurchased=rows.filter(x=>x.type==='purchase').reduce((s,x)=>s+Number(x.qty||0),0),qtySold=rows.filter(x=>x.type==='sale').reduce((s,x)=>s+Number(x.qty||0),0),waste=rows.filter(x=>x.type==='waste').reduce((s,x)=>s+Number(x.qty||0),0);return {period,rows,purchased,sales,qtyPurchased,qtySold,waste,net:sales-purchased}}
+DB.inventoryLedger=Array.isArray(DB.inventoryLedger)?DB.inventoryLedger:[];
+DB.inventory.forEach(i=>{
+ if(!i.cycleStartedAt){
+  const oldOpening=Number(i.opening||0),oldPurchased=Number(i.purchased||0),oldIssued=Number(i.issued||0),oldWaste=Number(i.waste||0),hist=new Date(Date.now()-86400000).toISOString(),now=new Date().toISOString();
+  if(oldOpening)DB.inventoryLedger.push({id:'mig-open-'+i.id,type:'opening',itemId:i.id,qty:oldOpening,amount:0,at:hist,note:'Migrated opening stock'});
+  if(oldPurchased)DB.inventoryLedger.push({id:'mig-purchase-'+i.id,type:'purchase',itemId:i.id,qty:oldPurchased,unitCost:0,amount:0,at:hist,note:'Migrated historical purchase'});
+  if(oldIssued)DB.inventoryLedger.push({id:'mig-sale-'+i.id,type:'sale',itemId:i.id,qty:oldIssued,unitPrice:Number(i.sell||0),amount:oldIssued*Number(i.sell||0),at:hist,note:'Migrated historical sold stock'});
+  if(oldWaste)DB.inventoryLedger.push({id:'mig-waste-'+i.id,type:'waste',itemId:i.id,qty:oldWaste,amount:0,at:hist,note:'Migrated historical waste'});
+  i.opening=Math.max(0,oldOpening+oldPurchased-oldIssued-oldWaste);i.purchased=0;i.issued=0;i.waste=0;i.cycleStartedAt=now;
+ }
+});
+save();
+
+function fmt(d){return new Date(d).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}
+function toast(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function audit(action,detail){DB.audit.unshift({id:'a'+Date.now(),at:new Date().toISOString(),action,detail});save()}
+
+
+function featureEnabled(key){return DB.settings.features?.[key]!==false}
+function toggleFeature(key,on){
+ DB.settings.features=DB.settings.features||{};
+ DB.settings.features[key]=!!on;
+ save();audit('Feature toggle changed',`${key}: ${on?'ON':'OFF'}`);save();
+ const el=document.querySelector(`[data-feature="${key}"]`);if(el&&el.parentElement?.nextElementSibling)el.parentElement.nextElementSibling.textContent=on?'Enabled':'Disabled';
+}
+function setAllFeatures(on){
+ DB.settings.features=DB.settings.features||{};
+ document.querySelectorAll('[data-feature]').forEach(el=>{el.checked=on;DB.settings.features[el.dataset.feature]=on});
+ save();audit('Master features changed',on?'All features enabled':'All features disabled');save();showPage('settings');toast(on?'All features enabled':'All features disabled');
+}
+function getExportRecords(scope){
+ if(scope==='guest')return DB.guests.map(g=>({id:g.id,label:g.name}));
+ if(scope==='booking')return DB.bookings.map(b=>({id:b.id,label:`${b.sr} · ${guest(b)?.name||''}`}));
+ if(scope==='room')return DB.rooms.map(r=>({id:r.id,label:`Room ${r.number}`}));
+ if(scope==='folio')return DB.bookings.filter(b=>b.status==='active').map(b=>({id:b.id,label:`${b.sr} · Room ${room(b)?.number||''}`}));
+ return [{id:'all',label:'Entire PMS data'}];
+}
+function refreshExportRecords(){
+ const scope=document.getElementById('exportScope')?.value,sel=document.getElementById('exportRecord');if(!sel)return;
+ sel.innerHTML=getExportRecords(scope).map(x=>`<option value="${x.id}">${esc(x.label)}</option>`).join('');
+}
+function exportCenter(){
+ const scope=document.getElementById('exportScope').value,format=document.getElementById('exportFormat').value,id=document.getElementById('exportRecord').value;
+ if((scope!=='all')&&!id){toast('Select a record first');return}
+ if(format==='json'){let data=scope==='all'?DB:scope==='guest'?guestExportPayload(id):scope==='booking'?DB.bookings.find(x=>x.id===id):scope==='room'?DB.rooms.find(x=>x.id===id):DB.bookings.find(x=>x.id===id);downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),`aurelia-${scope}.json`);return}
+ if(['csv','xlsx'].includes(format)){exportStructuredSpreadsheet(scope,id);return}
+ if(['pdf','handwriting'].includes(format)){exportPrintDocument(scope,id,format);return}
+ if(['jpg','png'].includes(format)){exportImageDocument(scope,id,format);return}
+}
+function selectedExportData(scope,id){
+ if(scope==='all')return DB;
+ if(scope==='guest')return DB.guests.find(x=>x.id===id);
+ if(scope==='booking'||scope==='folio')return DB.bookings.find(x=>x.id===id);
+ if(scope==='room')return DB.rooms.find(x=>x.id===id);
+ return DB;
+}
+function guestExportPayload(id){
+ const g=DB.guests.find(x=>x.id===id);if(!g)return null;
+ const bookings=DB.bookings.filter(b=>b.guestId===id).map(b=>({booking:b,room:room(b),charges:b.charges||[],payments:b.payments||[],total:total(b),paid:Number(b.paid||0),due:due(b)}));
+ const reservations=DB.reservations.filter(r=>r.guestId===id).map(r=>({...r,room:room({roomId:r.roomId})}));
+ return {guest:g,bookings,reservations,inventoryPurchases:DB.inventoryLedger.filter(t=>t.guestId===id),generatedAt:new Date().toISOString()};
+}
+function exportStructuredSpreadsheet(scope,id){
+ const data=scope==='guest'?guestExportPayload(id):selectedExportData(scope,id),rows=[];
+ if(scope==='guest'){
+  const g=data?.guest;rows.push(['GUEST PROFILE'],['Name',g?.name||''],['Phone / WhatsApp',g?.phone||''],['Email',g?.email||''],['ID Type',g?.idType||''],['ID Number',g?.idNumber||''],['Total Guests',1+(g?.occupants?.length||0)],['Vehicles',(g?.vehicles||[]).length],[],['OCCUPANTS'],['Name','DOB','Relation','ID Type','ID Number','Phone']);
+  (g?.occupants||[]).forEach(o=>rows.push([o.name,o.dob,o.relation,o.idType,o.idNumber,o.phone]));
+  rows.push([],['VEHICLES'],['Registration','Type']);(g?.vehicles||[]).forEach(v=>rows.push([v.reg,v.type]));
+  rows.push([],['BOOKINGS'],['SR','Room','Check In','Check Out','Status','Total','Paid','Due']);
+  (data?.bookings||[]).forEach(x=>rows.push([x.booking.sr,x.room?.number||'',x.booking.checkIn,x.booking.checkOut,x.booking.status,x.total,x.paid,x.due]));
+ }else if(scope==='booking'||scope==='folio'){const b=Array.isArray(data)?data:[data];rows.push(['SR','Guest','Room','Status','Check In','Check Out','Total','Paid','Due']);b.forEach(x=>rows.push([x.sr,guest(x)?.name||'',room(x)?.number||'',x.status,x.checkIn,x.checkOut,total(x),x.paid,due(x)]))}
+ else if(scope==='room'){const r=Array.isArray(data)?data:[data];rows.push(['Room','Type','Rate','Status']);r.forEach(x=>rows.push([x.number,x.type,x.rate,x.status]))}
+ else {rows.push(['Section','JSON']);rows.push(['AURELIA PMS',JSON.stringify(data)])}
+ const table=`<table><tbody>${rows.map((row,ri)=>`<tr>${row.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+ const blob=new Blob([`<html><head><meta charset="utf-8"></head><body>${table}</body></html>`],{type:'application/vnd.ms-excel'});
+ downloadBlob(blob,`aurelia-${scope}.xls`);
+}
+function exportPrintDocument(scope,id,format){
+ const data=scope==='guest'?guestExportPayload(id):selectedExportData(scope,id);
+ const title=scope==='guest'?'Guest detail':scope==='booking'?'Booking detail':scope==='room'?'Room detail':scope==='folio'?'Folio detail':'AURELIA PMS report';
+ const w=window.open('','_blank');if(!w){toast('Allow popups for export');return}
+
+ const rows=(arr)=>arr.map(x=>`<tr>${x.map(v=>`<td>${esc(v==null?'':String(v))}</td>`).join('')}</tr>`).join('');
+ const table=(headers,arr)=>`<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows(arr)}</tbody></table>`;
+ const section=(h,html)=>`<section class="box"><h3>${esc(h)}</h3>${html}</section>`;
+ let body='';
+
+ if(scope==='guest'&&data){
+   const g=data.guest||{};
+   body+=section('Guest profile',`<div class="grid">
+    <div><b>Name</b><br>${esc(g.name||'')}</div><div><b>Phone / WhatsApp</b><br>${esc(g.phone||'')}</div>
+    <div><b>Email</b><br>${esc(g.email||'')}</div><div><b>ID Type</b><br>${esc(g.idType||'')}</div>
+    <div><b>ID Number</b><br>${esc(g.idNumber||'')}</div><div><b>Total guests</b><br>${1+(g.occupants?.length||0)}</div>
+    <div><b>Vehicles</b><br>${g.vehicles?.length||0}</div>
+   </div>`);
+   body+=section('Occupants',table(['#','Name','DOB','Relation','ID Type','ID Number','Phone'],(g.occupants||[]).map((o,i)=>[i+1,o.name,o.dob,o.relation,o.idType,o.idNumber,o.phone])));
+   body+=section('Vehicles',table(['#','Registration','Type'],(g.vehicles||[]).map((v,i)=>[i+1,v.reg,v.type])));
+   body+=section('Bookings & folios',table(['SR','Room','Check-in','Check-out','Status','Guests','Total','Paid','Due'],(data.bookings||[]).map(x=>[x.booking.sr,x.room?.number||'',fmt(x.booking.checkIn),fmt(x.booking.checkOut),x.booking.status,x.booking.guests,x.total,x.paid,x.due])));
+   body+=section('Reservations',table(['SR','Room','Check-in','Check-out','Status','Guests'],(data.reservations||[]).map(x=>[x.sr||x.id,x.room?.number||'',fmt(x.checkIn),fmt(x.checkOut),x.status,x.guests])));
+ } else if(scope==='booking'||scope==='folio'){
+   const b=data||{}; const g=guest(b)||{}; const r=room(b)||{};
+   body+=section('Booking / folio summary',`<div class="grid">
+    <div><b>Booking SR</b><br>${esc(b.sr||'')}</div><div><b>Status</b><br>${esc(b.status||'')}</div>
+    <div><b>Guest</b><br>${esc(g.name||'')}</div><div><b>Guest count</b><br>${esc(b.guests??1)}</div>
+    <div><b>Room</b><br>${esc(r.number||'')}</div><div><b>Room type</b><br>${esc(r.type||'')}</div>
+    <div><b>Check-in</b><br>${esc(fmt(b.checkIn))}</div><div><b>Check-out</b><br>${esc(fmt(b.checkOut))}</div>
+    <div><b>Room rate</b><br>${money(r.rate||b.rate||0)}</div><div><b>Stay total</b><br>${money(total(b))}</div>
+    <div><b>Paid</b><br>${money(b.paid||0)}</div><div><b>Outstanding</b><br>${money(due(b))}</div>
+   </div>`);
+   body+=section('Guest identity',`<div class="grid"><div><b>ID type</b><br>${esc(g.idType||b.idType||'')}</div><div><b>ID number</b><br>${esc(g.idNumber||b.idNumber||'')}</div><div><b>Phone</b><br>${esc(g.phone||'')}</div></div>`);
+   body+=section('Folio charges',table(['Date','Description','Qty','Rate','Amount'],(b.charges||[]).map(c=>[fmt(c.at||c.date),c.name||c.item||c.description||'Charge',c.qty||1,money(c.rate||c.unitPrice||c.amount||0),money(c.amount||((c.qty||1)*(c.rate||c.unitPrice||0)))])));
+   body+=section('Payments',table(['Date','Method','Amount','Reference','Status'],(b.payments||[]).map(x=>[fmt(x.at||x.date),x.method||'',money(x.amount||0),x.reference||'',x.status||'verified'])));
+   body+=section('Balance',`<div class="balance"><span>Total ${money(total(b))}</span><span>Paid ${money(b.paid||0)}</span><strong>Due ${money(due(b))}</strong></div>`);
+   if(format==='handwriting') body+=section('Verification / signature',`<div class="signature">Guest signature: ___________________________________________<br><br>Staff verification: _________________________________________<br><br>Notes: ____________________________________________________</div>`);
+ } else if(scope==='room'){
+   const r=data||{};
+   const bs=DB.bookings.filter(b=>b.roomId===r.id);
+   body+=section('Room details',`<div class="grid"><div><b>Room</b><br>${esc(r.number||'')}</div><div><b>Type</b><br>${esc(r.type||'')}</div><div><b>Rate</b><br>${money(r.rate||0)}</div><div><b>Status</b><br>${esc(r.status||'')}</div><div><b>Floor</b><br>${esc(r.floor||'')}</div></div>`);
+   body+=section('Booking history',table(['SR','Guest','Check-in','Check-out','Status','Total','Paid','Due'],bs.map(b=>[b.sr,guest(b)?.name||'',fmt(b.checkIn),fmt(b.checkOut),b.status,money(total(b)),money(b.paid||0),money(due(b))])));
+ } else {
+   const inv=DB.inventory||[], invValue=inv.reduce((n,i)=>n+remaining(i)*Number(i.cost||i.purchasePrice||0),0);
+   const sales=(DB.inventoryLedger||[]).filter(x=>x.type==='sale'||x.kind==='sale').reduce((n,x)=>n+Number(x.amount||0),0);
+   const purchases=(DB.inventoryLedger||[]).filter(x=>x.type==='purchase'||x.kind==='purchase').reduce((n,x)=>n+Number(x.amount||0),0);
+   body+=section('PMS overview',`<div class="grid">
+    <div><b>Guests</b><br>${DB.guests.length}</div><div><b>Rooms</b><br>${DB.rooms.length}</div>
+    <div><b>Bookings</b><br>${DB.bookings.length}</div><div><b>Reservations</b><br>${DB.reservations.length}</div>
+    <div><b>Inventory items</b><br>${inv.length}</div><div><b>Inventory stock value</b><br>${money(invValue)}</div>
+    <div><b>Inventory sales</b><br>${money(sales)}</div><div><b>Inventory purchases</b><br>${money(purchases)}</div>
+   </div>`);
+   body+=section('Rooms',table(['Room','Type','Rate','Status'],DB.rooms.map(r=>[r.number,r.type,money(r.rate||0),r.status])));
+   body+=section('Bookings',table(['SR','Guest','Room','Check-in','Check-out','Status','Total','Paid','Due'],DB.bookings.map(b=>[b.sr,guest(b)?.name||'',room(b)?.number||'',fmt(b.checkIn),fmt(b.checkOut),b.status,money(total(b)),money(b.paid||0),money(due(b))])));
+   body+=section('Reservations',table(['SR','Guest','Room','Check-in','Check-out','Status'],DB.reservations.map(x=>[x.sr||x.id,DB.guests.find(g=>g.id===x.guestId)?.name||'',room({roomId:x.roomId})?.number||'',fmt(x.checkIn),fmt(x.checkOut),x.status])));
+   body+=section('Inventory balance',table(['Item','Stock','Reorder','Unit cost','Stock value'],inv.map(i=>[i.name,remaining(i),i.reorder||0,money(i.cost||i.purchasePrice||0),money(remaining(i)*Number(i.cost||i.purchasePrice||0))])));
+ }
+
+ w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+ <style>
+ @page{size:A4;margin:12mm}*{box-sizing:border-box}html,body{background:#fff!important;color:#172f35}
+ body{font-family:Arial,sans-serif;margin:0;padding:0;max-width:none;font-size:11pt;line-height:1.4}
+ .page{width:100%;max-width:190mm;margin:0 auto}.brand{font-family:Georgia,serif;font-size:25px;font-weight:700;margin-bottom:3px}.sub{color:#52676b;margin-bottom:16px}
+ h2{font-family:Georgia,serif;margin:12px 0 10px;font-size:20px}h3{font-family:Georgia,serif;margin:0 0 10px;font-size:15px}
+ .box{border:1px solid #d8e5e5;border-radius:9px;padding:12px;margin:0 0 12px;break-inside:avoid}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.line{padding:7px 0;border-bottom:1px solid #edf1f1}
+ table{width:100%;border-collapse:collapse;font-size:9.5pt}th,td{padding:7px 6px;border-bottom:1px solid #e5ecec;text-align:left;vertical-align:top}th{font-weight:700;background:#f2f7f7}
+ .balance{display:flex;gap:28px;justify-content:flex-end;flex-wrap:wrap;font-size:13px}.balance strong{font-size:15px}
+ .signature{line-height:2.1}
+ .footer{margin-top:18px;color:#718286;font-size:9pt}
+ @media print{.box{break-inside:avoid}button{display:none}}
+ </style></head><body><main class="page"><div class="brand">${esc(DB.settings.hotelName||'AURELIA 5★ HOTEL')}</div>
+ <div class="sub">${esc(DB.settings.address||'')}${DB.settings.phone?' · '+esc(DB.settings.phone):''}</div><h2>${esc(title)}</h2>${body}
+ <div class="footer">Generated ${esc(fmt(new Date().toISOString()))} · AURELIA PMS</div></main></body></html>`);
+ w.document.close();setTimeout(()=>w.print(),350);
+}
+function exportImageDocument(scope,id,format){
+ const data=scope==='guest'?guestExportPayload(id):selectedExportData(scope,id);
+ const title=scope==='guest'?'Guest detail':scope==='booking'?'Booking detail':scope==='room'?'Room detail':scope==='folio'?'Folio detail':'AURELIA PMS report';
+ const lines=[];
+ const add=(a='')=>lines.push(String(a));
+ if(scope==='guest'&&data){
+   const g=data.guest||{}; add(DB.settings.hotelName||'AURELIA 5★ HOTEL');add('GUEST DETAIL');add(`Name: ${g.name||''}`);add(`Phone / WhatsApp: ${g.phone||''}`);add(`Email: ${g.email||''}`);add(`ID Type: ${g.idType||''}`);add(`ID Number: ${g.idNumber||''}`);add(`Total guests: ${1+(g.occupants?.length||0)}`);add('');
+   add('OCCUPANTS');(g.occupants||[]).forEach((o,i)=>add(`${i+1}. ${o.name||''} · ${o.relation||''} · ${o.idType||''} ${o.idNumber||''}`));add('');
+   add('VEHICLES');(g.vehicles||[]).forEach((v,i)=>add(`${i+1}. ${v.reg||''} · ${v.type||''}`));add('');
+   add('BOOKINGS');(data.bookings||[]).forEach(x=>add(`${x.booking.sr} · Room ${x.room?.number||''} · ${x.booking.status} · Total ${money(x.total)} · Paid ${money(x.paid)} · Due ${money(x.due)}`));
+ }else if(scope==='booking'||scope==='folio'){
+   const b=data||{},g=guest(b)||{},r=room(b)||{};add(DB.settings.hotelName||'AURELIA 5★ HOTEL');add(title.toUpperCase());add(`SR: ${b.sr||''}`);add(`Guest: ${g.name||''}`);add(`Phone: ${g.phone||''}`);add(`ID: ${g.idType||b.idType||''} ${g.idNumber||b.idNumber||''}`);add(`Room: ${r.number||''} · ${r.type||''}`);add(`Check-in: ${fmt(b.checkIn)}`);add(`Check-out: ${fmt(b.checkOut)}`);add(`Guests: ${b.guests??1}`);add(`Room rate: ${money(r.rate||b.rate||0)}`);add(`Total: ${money(total(b))}`);add(`Paid: ${money(b.paid||0)}`);add(`Outstanding: ${money(due(b))}`);add('');add('FOLIO CHARGES');(b.charges||[]).forEach((c,i)=>add(`${i+1}. ${c.name||c.item||c.description||'Charge'} · Qty ${c.qty||1} · ${money(c.amount||((c.qty||1)*(c.rate||c.unitPrice||0)))}`));add('');add('PAYMENTS');(b.payments||[]).forEach((x,i)=>add(`${i+1}. ${x.method||''} · ${money(x.amount||0)} · ${x.status||'verified'}`));
+ }else if(scope==='room'){
+   const r=data||{};add(DB.settings.hotelName||'AURELIA 5★ HOTEL');add('ROOM DETAIL');add(`Room: ${r.number||''}`);add(`Type: ${r.type||''}`);add(`Rate: ${money(r.rate||0)}`);add(`Status: ${r.status||''}`);add('');add('BOOKING HISTORY');DB.bookings.filter(b=>b.roomId===r.id).forEach(b=>add(`${b.sr} · ${guest(b)?.name||''} · ${fmt(b.checkIn)} → ${fmt(b.checkOut)} · ${b.status} · Due ${money(due(b))}`));
+ }else{
+   add(DB.settings.hotelName||'AURELIA 5★ HOTEL');add('PMS OVERVIEW');add(`Guests: ${DB.guests.length}`);add(`Rooms: ${DB.rooms.length}`);add(`Bookings: ${DB.bookings.length}`);add(`Reservations: ${DB.reservations.length}`);add(`Inventory items: ${(DB.inventory||[]).length}`);add('');add('ROOM STATUS');DB.rooms.forEach(r=>add(`${r.number} · ${r.type} · ${money(r.rate||0)} · ${r.status}`));add('');add('BOOKINGS');DB.bookings.forEach(b=>add(`${b.sr} · ${guest(b)?.name||''} · Room ${room(b)?.number||''} · ${b.status} · Due ${money(due(b))}`));
+ }
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),width=1600,pad=80,lineH=48,maxChars=82;
+ const wrapped=[];lines.forEach(line=>{const m=String(line).match(new RegExp(`.{1,${maxChars}}(?:\\s|$)`,'g'));if(m)m.forEach(x=>wrapped.push(x.trim()));else wrapped.push(line)});
+ const height=Math.max(900,pad*2+wrapped.length*lineH+120);canvas.width=width;canvas.height=height;ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);ctx.fillStyle='#123842';
+ ctx.font='bold 46px Georgia';ctx.fillText(wrapped.shift()||title,pad,85);ctx.font='28px Arial';let y=155;
+ wrapped.forEach(line=>{if(y>height-pad){return}ctx.fillText(line,pad,y);y+=lineH});
+ canvas.toBlob(blob=>{if(blob){downloadBlob(blob,`aurelia-${scope}-${Date.now()}.${format}`);toast(`${format.toUpperCase()} image exported`) }},format==='jpg'?'image/jpeg':'image/png',0.95);
+}
+function quickGuestExport(id){
+ document.getElementById('exportScope').value='guest';refreshExportRecords();document.getElementById('exportRecord').value=id;document.getElementById('exportFormat').value='pdf';exportCenter();
+}
+
+function exportGuestSelected(){
+ const id=document.getElementById('guestExportSelect').value;if(!id){toast('Select a guest');return}
+ const format=prompt('Choose format: pdf, handwriting, xlsx, csv, json, jpg, png','pdf');if(!format)return;
+ document.getElementById('exportScope').value='guest';refreshExportRecords();document.getElementById('exportRecord').value=id;document.getElementById('exportFormat').value=format.toLowerCase();exportCenter();
+}
+let selectedImportFile=null;
+function inspectImportFile(e){
+ selectedImportFile=e.target.files?.[0]||null;
+ document.getElementById('importInfo').textContent=selectedImportFile?`${selectedImportFile.name} · ${Math.round(selectedImportFile.size/1024)} KB · ready for inspection/import`:'Select a file to inspect before importing.';
+}
+function importSelected(){
+ if(!selectedImportFile){toast('Choose an import file first');return}
+ const name=selectedImportFile.name.toLowerCase();
+ if(name.endsWith('.json')){
+  const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result);if(!obj||typeof obj!=='object')throw new Error('Invalid JSON');DB=obj;save();setupNav();refreshBrand();showPage('dashboard');audit('JSON import completed',selectedImportFile.name);save();toast('JSON data imported')}catch(e){toast('Invalid JSON backup')}};reader.readAsText(selectedImportFile);return;
+ }
+ toast('File accepted. Native Flutter import adapter should parse PDF/XLSX/images and map fields safely before committing them.');
+}
+function setupNav(){
+ const side=document.getElementById('sideNav'); side.innerHTML=MODULES.map(([id,n])=>`<button data-nav="${id}" onclick="showPage('${id}')">${n}</button>`).join('');
+ document.getElementById('moreMenu').innerHTML=MODULES.map(([id,n])=>`<button onclick="showPage('${id}');toggleMore()">${n}</button>`).join('');
+}
+function activeNav(id){document.querySelectorAll('[data-nav]').forEach(x=>x.classList.toggle('active',x.dataset.nav===id))}
+function showPage(id){
+ activeNav(id); document.getElementById('searchResults').classList.remove('show');
+ const fn=pages[id]||pages.dashboard; document.getElementById('appContent').innerHTML=fn(); if(id==='importExport'){refreshExportRecords();document.getElementById('exportScope').onchange=refreshExportRecords;} window.scrollTo(0,0);
+}
+function toggleMore(){document.getElementById('moreMenu').classList.toggle('show')}
+
+function pagesDashboard(){
+ const occupied=DB.rooms.filter(r=>r.status==='occupied').length, available=DB.rooms.filter(r=>r.status==='available').length, reserved=DB.rooms.filter(r=>r.status==='reserved').length;
+ const active=DB.bookings.filter(b=>b.status==='active'), outstanding=active.reduce((s,b)=>s+due(b),0);
+ const low=DB.inventory.filter(i=>remaining(i)<=Number(i.reorder||0));
+ return `<div class="hero"><div><h1>Hotel command center</h1><p>${DB.settings.hotelName} · Live operational overview · ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p></div><div class="actions"><button class="btn primary" onclick="openBooking()">＋ New booking</button><button class="btn" onclick="showPage('reservations')">Reservation</button><button class="btn" onclick="showPage('pos')">POS</button></div></div>
+ <div class="grid kpis">
+ ${kpi('Occupancy',DB.rooms.length?Math.round(occupied/DB.rooms.length*100)+'%':'0%',`${occupied} occupied · ${available} available`)}
+ ${kpi('Arrivals',DB.bookings.filter(b=>b.checkIn.slice(0,10)===new Date().toISOString().slice(0,10)).length,'Today')}
+ ${kpi('Departures',DB.bookings.filter(b=>b.checkOut.slice(0,10)===new Date().toISOString().slice(0,10)).length,'Today')}
+ ${kpi('Reserved',reserved,'Confirmed')}
+ ${kpi('Guests in house',active.reduce((s,b)=>s+Number(b.guests||1),0),'Active stays')}
+ ${kpi('Outstanding',money(outstanding),'All active folios')}
+ </div>
+ <div class="grid two" style="margin-top:16px">
+  <section class="card"><div class="section-title"><h2>Attention</h2><button class="btn small" onclick="showPage('reports')">Reports</button></div>
+   <div class="attention">
+    <div class="alert ${outstanding?'danger':''}"><span>Pending dues across active folios</span><b>${money(outstanding)}</b></div>
+    <div class="alert ${low.length?'warn':''}"><span>Inventory below reorder level</span><b>${low.length}</b></div>
+    <div class="alert"><span>Rooms requiring housekeeping</span><b>${DB.rooms.filter(r=>r.status==='cleaning').length}</b></div>
+    <div class="alert"><span>Payment announcement</span><b>${DB.settings.paymentAnnouncement?'ON':'OFF'}</b></div>
+   </div>
+  </section>
+  <section class="card"><div class="section-title"><h2>Recent activity</h2><button class="btn small" onclick="showPage('audit')">Audit</button></div>
+   <div class="list">${DB.audit.slice(0,5).map(a=>`<div class="item"><b>${a.action}</b><div class="muted">${a.detail}</div><small class="muted">${fmt(a.at)}</small></div>`).join('')||'<div class="empty">No activity yet</div>'}</div>
+  </section>
+ </div>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Room command board</h2><button class="btn small" onclick="showPage('rooms')">Manage rooms</button></div>
+ <div class="room-grid">${DB.rooms.map(r=>roomCard(r)).join('')}</div></section>`;
+}
+function kpi(l,v,s){return `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><small>${s}</small></div>`}
+function roomCard(r){let b=DB.bookings.find(x=>x.roomId===r.id&&x.status==='active');let g=b&&guest(b);return `<div class="room"><div class="row" style="justify-content:space-between"><span class="num">${r.number}</span><span class="status ${r.status}">${r.status}</span></div><div class="muted">${r.type} · ${money(r.rate)}</div>${g?`<div style="margin-top:8px"><b>${g.name}</b><div class="muted">${fmt(b.checkOut)}</div></div>`:''}<div class="actions" style="margin-top:11px"><button class="btn small" onclick="showPage('folio');setTimeout(()=>openFolio('${b?.id||''}'),50)">Folio</button><button class="btn small" onclick="openRoomEdit('${r.id}')">Manage</button></div></div>`}
+
+function pagesBookings(){
+ DB.bookings.forEach(recalcBooking);
+ return `<div class="hero"><div><h1>Bookings / Active stays</h1><p>Every stay has a permanent SR number.</p></div><div class="actions"><button class="btn primary" onclick="openBooking()">＋ New booking</button></div></div>
+ <div class="list">${DB.bookings.map(b=>{let g=guest(b),r=room(b);return `<div class="item">
+ <div class="item-head"><div><h3>${b.sr}</h3><b>${g?.name||'Unknown guest'}</b><div class="muted">Room ${r?.number||'-'} · ${b.guests||1} guest(s)</div></div><span class="status ${b.status==='active'?'occupied':'available'}">${b.status}</span></div>
+ <div class="row" style="margin:12px 0"><span>${fmt(b.checkIn)} → ${fmt(b.checkOut)}</span></div>
+ <div class="row"><span>Total <b>${money(total(b))}</b></span><span>Paid <b>${money(b.paid)}</b></span><span class="${due(b)?'due':'ok'}">Due <b>${money(due(b))}</b></span></div>
+ <div class="actions" style="margin-top:12px"><button class="btn small" onclick="callGuest('${g?.phone||''}')">☎ Call</button><button class="btn small" onclick="msgGuest('${g?.phone||''}')">WhatsApp</button><button class="btn small" onclick="shareInvoice('${b.id}')">Invoice</button><button class="btn small" onclick="showPage('folio');setTimeout(()=>openFolio('${b.id}'),50)">Folio</button><button class="btn small" onclick="openBooking('${b.id}')">Edit</button><button class="btn small" onclick="checkout('${b.id}')">Checkout</button></div>
+ </div>`}).join('')||'<div class="card empty">No bookings</div>'}</div>`;
+}
+
+function pagesReservations(){
+ return `<div class="hero"><div><h1>Reservations</h1><p>Exact-date room inventory and conversion to stays.</p></div><button class="btn primary" onclick="openReservation()">＋ Reservation</button></div>
+ <div class="list">${DB.reservations.map(x=>{let g=guest({guestId:x.guestId}),r=room({roomId:x.roomId});return `<div class="item"><div class="item-head"><div><h3>${x.sr}</h3><b>${g?.name||'Guest'}</b><div class="muted">Room ${r?.number||'-'} · ${fmt(x.from)} → ${fmt(x.to)}</div></div><span class="status reserved">${x.status}</span></div><div class="actions" style="margin-top:12px"><button class="btn small" onclick="openReservation('${x.id}')">Edit</button><button class="btn small" onclick="convertReservation('${x.id}')">Check-in / Convert</button><button class="btn small danger" onclick="cancelReservation('${x.id}')">Cancel</button></div></div>`}).join('')||'<div class="card empty">No reservations</div>'}</div>`;
+}
+
+function pagesGuests(){
+ return `<div class="hero"><div><h1>Guests / Occupants / Vehicles</h1><p>Every person has identity information and every vehicle can be recorded.</p></div><button class="btn primary" onclick="openGuest()">＋ Add guest</button></div>
+ <div class="list">${DB.guests.map(g=>`<div class="item"><div class="item-head"><div><h3>${g.name}</h3><div class="muted">${g.phone||'No phone'} · ${g.email||'No email'}</div></div><span class="status occupied">Primary guest</span></div>
+ <div class="row" style="margin:10px 0"><span>ID: <b>${g.idType||'Not recorded'}</b> ${g.idNumber||''}</span><span>Occupants: <b>${g.occupants?.length||0}</b></span><span>Vehicles: <b>${g.vehicles?.length||0}</b></span></div>
+ <div class="row">${g.idPhoto?`<img class="photo" src="${g.idPhoto}" alt="ID">`:'<span class="muted">No ID photo</span>'}${(g.vehicles||[]).map(v=>`<span class="status available">${v.reg} · ${v.type}</span>`).join('')}</div>
+ <div class="actions" style="margin-top:12px"><button class="btn small" onclick="openGuest('${g.id}')">Edit / OCR</button><button class="btn small" onclick="guestHistory('${g.id}')">History</button><button class="btn small" onclick="quickGuestExport('${g.id}')">Export all guest data</button></div>
+ </div>`).join('')}</div>`;
+}
+
+function pagesRooms(){
+ return `<div class="hero"><div><h1>Rooms</h1><p>Room inventory, rate and operational status.</p></div><button class="btn primary" onclick="openRoomEdit()">＋ Add room</button></div>
+ <div class="room-grid">${DB.rooms.map(roomCard).join('')}</div>`;
+}
+function pagesFolio(){
+ const active=DB.bookings.filter(b=>b.status==='active').map(b=>{recalcBooking(b);return b});
+ return `<div class="hero"><div><h1>Folio / Dues</h1><p>One live ledger per stay. Every purchased item is visible.</p></div></div>
+ <div class="list">${active.map(b=>{let g=guest(b),r=room(b);return `<div class="item"><div class="item-head"><div><h3>${b.sr} · Room ${r?.number}</h3><b>${g?.name}</b></div><b class="${due(b)?'due':'ok'}">${due(b)?'DUE ':'PAID '}${money(due(b))}</b></div>
+ <div style="margin:12px 0">${b.charges.map(c=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid #edf3f2"><span>${c.item} × ${c.qty}<small class="muted"> · ${fmt(c.at)}</small></span><b>${money(c.amount)}</b></div>`).join('')}</div>
+ <div class="row"><span>Total <b>${money(total(b))}</b></span><span>Paid <b>${money(b.paid)}</b></span><span class="${due(b)?'due':'ok'}">Pending <b>${money(due(b))}</b></span></div>
+ <div class="actions" style="margin-top:12px"><button class="btn small" onclick="openCharge('${b.id}')">＋ Charge</button><button class="btn small" onclick="recordPayment('${b.id}')">Record payment</button><button class="btn small" onclick="shareInvoice('${b.id}')">Pending invoice</button></div>
+ </div>`}).join('')||'<div class="card empty">No active folios</div>'}</div>`;
+}
+function pagesInvoices(){
+ const rows=DB.bookings.flatMap(b=>{const g=guest(b);return [{b,g,type:'PENDING',amount:due(b)}]});
+ return `<div class="hero"><div><h1>Invoices</h1><p>Documents are snapshots of the folio and never create another balance.</p></div></div>
+ <div class="list">${rows.map(x=>`<div class="item"><div class="item-head"><div><h3>INV-${String(x.b.id).replace(/\\D/g,'')||'000001'} · ${x.type}</h3><div class="muted">${x.b.sr} · ${x.g?.name||''}</div></div><b class="${x.amount?'due':'ok'}">${x.amount?money(x.amount):'PAID'}</b></div><div class="actions" style="margin-top:11px"><button class="btn small" onclick="viewInvoice('${x.b.id}')">View</button><button class="btn small" onclick="shareInvoice('${x.b.id}')">Share</button><button class="btn small" onclick="printInvoice('${x.b.id}')">Print / PDF</button></div></div>`).join('')}</div>`;
+}
+function pagesHousekeeping(){
+ const cleaning=DB.rooms.filter(r=>r.status==='cleaning');
+ return `<div class="hero"><div><h1>Housekeeping</h1><p>Checkout turns the room into a cleaning task until released.</p></div></div>
+ <div class="list">${DB.rooms.map(r=>`<div class="item"><div class="item-head"><div><h3>Room ${r.number}</h3><div class="muted">${r.type}</div></div><span class="status ${r.status}">${r.status}</span></div><div class="actions" style="margin-top:11px"><button class="btn small" onclick="setRoomStatus('${r.id}','cleaning')">Mark cleaning</button><button class="btn small" onclick="setRoomStatus('${r.id}','available')">Release clean</button></div></div>`).join('')}</div>`;
+}
+function pagesPOS(){
+ const totalStockValue=DB.inventory.reduce((s,i)=>s+remaining(i)*Number(i.sell||0),0);
+ const low=DB.inventory.filter(i=>remaining(i)<=Number(i.reorder||0));
+ const recent=DB.inventoryLedger.filter(t=>t.type==='sale').sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,12);
+ return `<div class="hero"><div><h1>POS / Inventory Command</h1><p>Purchases add to existing stock. Sales deduct from the live stock ledger and post the exact amount to the guest folio.</p></div><div class="actions"><button class="btn primary" onclick="openInventory()">＋ Item</button><button class="btn" onclick="openInventoryPurchase()">＋ Purchase</button><button class="btn" onclick="resetInventoryCycle()">Reset cycle</button></div></div>
+ <div class="grid three">${kpi('Stock value',money(totalStockValue),'Current sell-value')}${kpi('Low stock',low.length,'Reorder alerts')}${kpi('Inventory income',money(inventoryReport('All Time').sales),'All-time POS sales')}</div>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Stock control</h2><button class="btn small" onclick="showPage('reports')">Full reports</button></div>
+ <div class="room-grid">${DB.inventory.map(i=>`<div class="room"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(i.name)}</h3><span class="status ${remaining(i)<=i.reorder?'cleaning':'available'}">${remaining(i)} ${esc(i.unit)}</span></div><div class="muted" style="margin:8px 0">Opening cycle ${i.opening} · Sell ${money(i.sell)} · Reorder ${i.reorder}</div><div class="money">Live stock: ${remaining(i)}</div><div class="actions" style="margin-top:11px"><button class="btn small primary" onclick="issuePOS('${i.id}')">Sell / Issue</button><button class="btn small" onclick="openInventoryPurchase('${i.id}')">Purchase</button><button class="btn small" onclick="openInventory('${i.id}')">Edit</button><button class="btn small" onclick="inventoryHistory('${i.id}')">History</button></div></div>`).join('')}</div></section>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Inventory balance sheet</h2><div class="actions"><button class="btn small" onclick="inventoryBalanceSheet('Daily')">Daily</button><button class="btn small" onclick="inventoryBalanceSheet('Weekly')">Weekly</button><button class="btn small" onclick="inventoryBalanceSheet('Monthly')">Monthly</button><button class="btn small" onclick="inventoryBalanceSheet('All Time')">All time</button></div></div>
+ <div class="muted">Income = sold inventory. Expense = inventory purchases. Net = income − purchase expense. Waste and stock quantities are shown separately.</div>
+ <div class="actions" style="margin-top:12px"><button class="btn" onclick="exportInventoryReport('Daily','csv')">Export daily</button><button class="btn" onclick="exportInventoryReport('Weekly','csv')">Export weekly</button><button class="btn" onclick="exportInventoryReport('Monthly','csv')">Export monthly</button><button class="btn" onclick="exportInventoryReport('All Time','csv')">Export all-time</button></div></section>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Recent sold records</h2><button class="btn small" onclick="inventoryBalanceSheet('All Time')">Open ledger</button></div>
+ <div class="list">${recent.map(t=>{const i=DB.inventory.find(x=>x.id===t.itemId),b=t.bookingId?DB.bookings.find(x=>x.id===t.bookingId):null;return `<div class="item"><div class="item-head"><div><b>${esc(i?.name||'Item')}</b><div class="muted">${fmt(t.at)} · ${t.qty} ${esc(i?.unit||'')}</div></div><b>${money(t.amount||0)}</b></div><div class="muted">${b?`${b.sr} · Room ${room(b)?.number||''} · ${guest(b)?.name||''}`:'Inventory sale'}</div><div class="actions" style="margin-top:8px"><button class="btn small" onclick="exportInventoryRecord('${t.id}')">Export record</button></div></div>`}).join('')||'<div class="empty">No sold inventory records yet</div>'}</div></section>
+ </div>`;
+}
+function pagesExpenses(){
+ return `<div class="hero"><div><h1>Expenses</h1><p>Financial records can be edited or voided; voiding is audited.</p></div><button class="btn primary" onclick="openExpense()">＋ Expense</button></div>
+ <div class="list">${DB.expenses.map(e=>`<div class="item"><div class="item-head"><div><h3>${e.title}</h3><div class="muted">${e.category} · ${fmt(e.at)}</div></div><div><b>${money(e.amount)}</b><div class="${e.status==='active'?'ok':'danger-text'}">${e.status}</div></div></div><div class="actions" style="margin-top:11px"><button class="btn small" onclick="openExpense('${e.id}')">Edit</button>${e.status==='active'?`<button class="btn small danger" onclick="voidExpense('${e.id}')">Void</button>`:''}</div></div>`).join('')}</div>`;
+}
+function pagesReports(){
+ const totalRev=DB.bookings.reduce((s,b)=>s+total(b),0), collected=DB.bookings.reduce((s,b)=>s+Number(b.paid||0),0), dueAll=DB.bookings.reduce((s,b)=>s+due(b),0), exp=DB.expenses.filter(e=>e.status==='active').reduce((s,e)=>s+Number(e.amount||0),0);
+ return `<div class="hero"><div><h1>Reports</h1><p>Choose a period and generate the actual ledger-based balance sheet.</p></div></div>
+ <section class="card"><div class="section-title"><h2>Balance sheet</h2></div>
+ <div class="report-box">${['Daily','Weekly','Monthly','Yearly','All Time','Custom'].map(p=>`<button class="btn" onclick="balanceSheet('${p}')">${p}</button>`).join('')}</div>
+ <div class="grid three" style="margin-top:16px">${kpi('Revenue',money(totalRev),'Current data')}${kpi('Collected',money(collected),'Verified payments')}${kpi('Outstanding',money(dueAll),'Open folios')}</div>
+ <div class="grid two" style="margin-top:16px">${kpi('Expenses',money(exp),'Active expenses')}${kpi('Net',money(totalRev-exp),'Revenue less expenses')}</div>
+ </section>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Inventory income / expense</h2><div class="actions"><button class="btn small" onclick="inventoryBalanceSheet('Daily')">Daily</button><button class="btn small" onclick="inventoryBalanceSheet('Weekly')">Weekly</button><button class="btn small" onclick="inventoryBalanceSheet('Monthly')">Monthly</button><button class="btn small" onclick="inventoryBalanceSheet('All Time')">All time</button></div></div>
+ <div class="grid three">${kpi('Inventory income',money(inventoryReport('All Time').sales),'Sold products')}${kpi('Inventory expense',money(inventoryReport('All Time').purchased),'Purchases')}${kpi('Inventory net',money(inventoryReport('All Time').net),'Income − purchases')}</div></section>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Exports</h2></div><div class="actions"><button class="btn" onclick="exportCSV()">Excel-compatible CSV</button><button class="btn" onclick="exportJSON()">JSON backup</button><button class="btn" onclick="window.print()">Print / Save PDF</button></div></section>`;
+}
+function pagesAudit(){return `<div class="hero"><div><h1>Audit</h1><p>Every important financial and operational change is recorded.</p></div></div><div class="list">${DB.audit.map(a=>`<div class="item"><b>${a.action}</b><div class="muted">${a.detail}</div><small>${fmt(a.at)}</small></div>`).join('')||'<div class="card empty">No audit events</div>'}</div>`}
+
+function pagesImportExport(){
+ return `<div class="hero"><div><h1>Import / Export Center</h1><p>Choose exactly what you want to import or export and the file format.</p></div></div>
+ <div class="grid two">
+  <section class="card">
+   <div class="section-title"><h2>Export</h2></div>
+   <div class="field"><label>Export scope</label><select id="exportScope">
+    <option value="all">Entire PMS data</option><option value="guest">Single guest</option><option value="booking">Single booking</option><option value="room">Single room</option><option value="folio">Single folio</option>
+   </select></div>
+   <div class="field" style="margin-top:10px"><label>Record</label><select id="exportRecord"><option value="">Select a record</option></select></div>
+   <div class="field" style="margin-top:10px"><label>File format</label><select id="exportFormat">
+    <option value="pdf">PDF / printable document</option><option value="handwriting">Handwriting / printable page</option><option value="xlsx">Excel sheet (.xls compatible)</option><option value="csv">Spreadsheet / CSV</option><option value="json">JSON</option><option value="jpg">JPG</option><option value="png">PNG</option>
+   </select></div>
+   <button class="btn primary" style="margin-top:12px" onclick="exportCenter()">Export file</button>
+   <div class="muted" style="margin-top:10px">For JPG/PNG, a document-style image is generated. For PDF/handwriting, a print-ready document opens so the user can save/print it.</div>
+  </section>
+  <section class="card">
+   <div class="section-title"><h2>Import</h2></div>
+   <div class="import-drop">
+    <input id="importFile" type="file" accept=".pdf,.html,.htm,.xlsx,.xls,.csv,.json,.jpg,.jpeg,.png,.webp,image/*" onchange="inspectImportFile(event)" style="display:none">
+    <button class="btn primary" onclick="document.getElementById('importFile').click()">Choose PDF / handwriting / Excel / spreadsheet / JSON / JPG / PNG</button>
+    <div id="importInfo" class="muted" style="margin-top:12px">Select a file to inspect before importing.</div>
+   </div>
+   <div class="actions" style="margin-top:12px"><button class="btn" onclick="importSelected()">Import into PMS</button><button class="btn danger" onclick="document.getElementById('importFile').value='';document.getElementById('importInfo').textContent='Select a file to inspect before importing.'">Clear</button></div>
+   <div class="muted" style="margin-top:10px">JSON import is fully handled by this prototype. Binary PDF/XLSX/image parsing requires the Flutter production import adapters.</div>
+  </section>
+ </div>
+ <section class="card" style="margin-top:16px"><div class="section-title"><h2>Single guest export</h2></div><div class="row"><select id="guestExportSelect" style="min-width:240px;padding:11px;border:1px solid var(--line);border-radius:12px"><option value="">Select guest</option>${DB.guests.map(g=>`<option value="${g.id}">${esc(g.name)} · ${esc(g.phone||'')}</option>`).join('')}</select><button class="btn" onclick="exportGuestSelected()">Choose format & export</button></div></section>`;
+}
+function pagesSettings(){
+ DB.settings.features=DB.settings.features||{};
+
+ return `<div class="hero"><div><h1>Settings</h1><p>Full hotel control. Changes are saved locally immediately.</p></div></div>
+ <div class="grid two">
+ <section class="card"><div class="section-title"><h2>Hotel identity</h2></div><div class="logo-preview"><img id="settingsLogo" src="${DB.settings.logo||''}" onerror="this.style.display='none'"><div><button class="btn" onclick="document.getElementById('logoFile').click()">Upload logo</button><input id="logoFile" type="file" accept="image/*" hidden onchange="setLogo(event)"></div></div>
+ <div class="form-grid" style="margin-top:12px">${field('Hotel name','hotelName',DB.settings.hotelName)}${field('Phone','phone',DB.settings.phone)}${field('Address','address',DB.settings.address,true)}${field('GST','gst',DB.settings.gst)}${field('UPI','upi',DB.settings.upi)}${field('Currency','currency',DB.settings.currency)}</div><button class="btn primary" style="margin-top:12px" onclick="saveSettings()">Save identity</button></section>
+ <section class="card"><div class="section-title"><h2>Master features</h2><button class="btn small" onclick="setAllFeatures(true)">Enable all</button></div>
+<div class="feature-grid"><div class="feature-row"><label><span>Dashboard / command center</span><input type="checkbox" data-feature="dashboard" checked onchange="toggleFeature('dashboard',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Universal search</span><input type="checkbox" data-feature="universalSearch" checked onchange="toggleFeature('universalSearch',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Reservations</span><input type="checkbox" data-feature="reservations" checked onchange="toggleFeature('reservations',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Bookings / active stays</span><input type="checkbox" data-feature="bookings" checked onchange="toggleFeature('bookings',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Guests / occupants</span><input type="checkbox" data-feature="guests" checked onchange="toggleFeature('guests',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Guest OCR workflow</span><input type="checkbox" data-feature="guestOCR" checked onchange="toggleFeature('guestOCR',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Guest photos</span><input type="checkbox" data-feature="guestPhotos" checked onchange="toggleFeature('guestPhotos',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Multiple vehicles</span><input type="checkbox" data-feature="vehicles" checked onchange="toggleFeature('vehicles',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Room management</span><input type="checkbox" data-feature="rooms" checked onchange="toggleFeature('rooms',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Folio / dues</span><input type="checkbox" data-feature="folio" checked onchange="toggleFeature('folio',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Invoices / receipts</span><input type="checkbox" data-feature="invoices" checked onchange="toggleFeature('invoices',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Terms & Conditions</span><input type="checkbox" data-feature="terms" checked onchange="toggleFeature('terms',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Housekeeping</span><input type="checkbox" data-feature="housekeeping" checked onchange="toggleFeature('housekeeping',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>POS / Food</span><input type="checkbox" data-feature="pos" checked onchange="toggleFeature('pos',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Inventory</span><input type="checkbox" data-feature="inventory" checked onchange="toggleFeature('inventory',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Kitchen display / KDS</span><input type="checkbox" data-feature="kds" checked onchange="toggleFeature('kds',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Expenses</span><input type="checkbox" data-feature="expenses" checked onchange="toggleFeature('expenses',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Reports</span><input type="checkbox" data-feature="reports" checked onchange="toggleFeature('reports',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Balance sheets</span><input type="checkbox" data-feature="balanceSheets" checked onchange="toggleFeature('balanceSheets',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Audit trail</span><input type="checkbox" data-feature="audit" checked onchange="toggleFeature('audit',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Notifications / alerts</span><input type="checkbox" data-feature="notifications" checked onchange="toggleFeature('notifications',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Payment announcement</span><input type="checkbox" data-feature="paymentAnnouncement" checked onchange="toggleFeature('paymentAnnouncement',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Automatic local backup</span><input type="checkbox" data-feature="autoBackup" checked onchange="toggleFeature('autoBackup',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Google Drive sync target</span><input type="checkbox" data-feature="driveSync" checked onchange="toggleFeature('driveSync',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Import / Export Center</span><input type="checkbox" data-feature="importExport" checked onchange="toggleFeature('importExport',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Single-room exports</span><input type="checkbox" data-feature="roomExports" checked onchange="toggleFeature('roomExports',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Single-guest exports</span><input type="checkbox" data-feature="guestExports" checked onchange="toggleFeature('guestExports',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>WhatsApp actions</span><input type="checkbox" data-feature="whatsapp" checked onchange="toggleFeature('whatsapp',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Tap to call</span><input type="checkbox" data-feature="call" checked onchange="toggleFeature('call',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>UPI payment QR</span><input type="checkbox" data-feature="paymentQR" checked onchange="toggleFeature('paymentQR',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Verified payment workflow</span><input type="checkbox" data-feature="paymentVerification" checked onchange="toggleFeature('paymentVerification',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Invoice JPG / PNG</span><input type="checkbox" data-feature="invoiceImage" checked onchange="toggleFeature('invoiceImage',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Invoice PDF</span><input type="checkbox" data-feature="invoicePDF" checked onchange="toggleFeature('invoicePDF',this.checked)"></label><small>Enabled</small></div><div class="feature-row"><label><span>Offline-first mode</span><input type="checkbox" data-feature="offlineMode" checked onchange="toggleFeature('offlineMode',this.checked)"></label><small>Enabled</small></div></div>
+<div class="muted" style="margin-top:12px">Every listed module is individually configurable. Native Google Drive, Android OCR and verified payment callbacks are wired as production adapters in Flutter; this HTML keeps the controls and workflows explicit.</div></section>
+ </div>`;
+}
+function field(label,key,val,full=false){return `<div class="field ${full?'full':''}"><label>${label}</label><input id="${key}" data-setting="${key}" value="${esc(val||'')}"></div>`}
+function check(label,key,val){return `<label class="check" style="margin:12px 0"><input type="checkbox" data-setting-check="${key}" ${val?'checked':''}>${label}</label>`}
+function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;')}
+
+const pages={importExport:pagesImportExport,dashboard:pagesDashboard,reservations:pagesReservations,bookings:pagesBookings,guests:pagesGuests,rooms:pagesRooms,folio:pagesFolio,invoices:pagesInvoices,housekeeping:pagesHousekeeping,pos:pagesPOS,expenses:pagesExpenses,reports:pagesReports,audit:pagesAudit,settings:pagesSettings};
+
+function openModal(title,body,buttons='<button class="btn" onclick="closeModal()">Close</button>'){document.getElementById('modal').innerHTML=`<div class="row" style="justify-content:space-between"><h2>${title}</h2><button class="iconbtn" onclick="closeModal()">×</button></div>${body}<div class="actions" style="margin-top:18px;justify-content:flex-end">${buttons}</div>`;document.getElementById('modalBack').classList.add('show')}
+function closeModal(){document.getElementById('modalBack').classList.remove('show')}
+function roomOptionHTML(b){
+ const current=b?.roomId||'';
+ return DB.rooms.map(x=>{
+   const blocked=!current||x.id!==current ? ['occupied','reserved','cleaning','maintenance'].includes(x.status) : false;
+   return `<option value="${x.id}" ${x.id===current?'selected':''} ${blocked?'disabled':''}>${x.number} · ${x.type} · ${money(x.rate)} · ${x.status}</option>`;
+ }).join('');
+}
+function updateBookingRoomRate(){
+ const roomId=document.getElementById('bkRoom')?.value, inAt=document.getElementById('bkIn')?.value, outAt=document.getElementById('bkOut')?.value, r=DB.rooms.find(x=>x.id===roomId);
+ if(!r)return;
+ const rate=Number(r.rate||0), nights=nightsBetween(inAt,outAt), amount=rate*nights;
+ const base=document.getElementById('bkBase');if(base){base.value=amount;base.dataset.auto='true'}
+ const hint=document.getElementById('bkRateHint');if(hint)hint.textContent=`${money(rate)} × ${nights} night${nights===1?'':'s'} = ${money(amount)}`;
+}
+function syncBookingGuestCount(){
+ const count=1+document.querySelectorAll('#occList [data-occ]').length;
+ const el=document.getElementById('bkGuests');if(el){el.value=count;el.readOnly=true}
+ const label=document.getElementById('guestCountHint');if(label)label.textContent=`${count} total guest${count===1?'':'s'} (primary + occupants)`;
+}
+function openBooking(id){
+ const b=id?DB.bookings.find(x=>x.id===id):null; const g=b&&guest(b), r=b&&room(b);
+ let occ=(g?.occupants||[]).map((o,i)=>occupantHTML(o,i)).join('');
+ let veh=(g?.vehicles||[]).map((v,i)=>vehicleHTML(v,i)).join('');
+ const checkIn=b?.checkIn||new Date().toISOString().slice(0,16), checkOut=b?.checkOut||new Date(Date.now()+86400000).toISOString().slice(0,16);
+ openModal(b?'Edit booking':'New booking',`<div class="form-grid">
+ ${field('Primary guest name','bkGuest',g?.name||'')}${field('Phone / WhatsApp','bkPhone',g?.phone||'')}
+ ${field('Government ID type','bkIdType',g?.idType||'')}${field('Government ID number','bkIdNumber',g?.idNumber||'')}
+ <div class="field full"><label>Room — rate auto-fetch</label><select id="bkRoom" onchange="updateBookingRoomRate()">${roomOptionHTML(b)}</select><small id="bkRateHint" class="muted">Select a room to calculate its rate automatically.</small></div>
+ ${field('Check-in','bkIn',checkIn)}${field('Check-out','bkOut',checkOut)}${field('Room/base amount (auto)','bkBase',b?.base||bookingRoomAmount(b?.roomId||DB.rooms.find(x=>!['occupied','reserved','cleaning','maintenance'].includes(x.status))?.id,checkIn,checkOut))}${field('Discount','bkDiscount',b?.discount||'0')}${field('Paid / advance','bkPaid',b?.paid||'0')}${field('Guest count (auto)','bkGuests',b?.guests||1)}
+ </div>
+ <div class="subcard"><div class="subhead"><b>Primary guest identity</b><button class="btn small" onclick="openGuest('${g?.id||''}')">Full guest / OCR</button></div><div class="muted" style="margin-top:6px" id="bookingIdentityHint">${g?.idType||'ID not recorded'} ${g?.idNumber||''}</div></div>
+ <div class="subcard"><div class="subhead"><b>Guests / occupants</b><button class="btn small" onclick="addOccupantField()">＋ Add occupant</button></div><div id="occList">${occ}</div><div id="guestCountHint" class="muted" style="margin-top:8px"></div></div>
+ <div class="subcard"><div class="subhead"><b>Vehicles</b><button class="btn small" onclick="addVehicleField()">＋ Add vehicle</button></div><div id="vehList">${veh}</div></div>
+ <div class="subcard"><div class="field full"><label>Notes</label><textarea id="bkNotes">${esc(b?.notes||'')}</textarea></div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveBookingForm('${id||''}')">Save booking</button>`);
+ setTimeout(()=>{document.getElementById('bkIn')?.addEventListener('change',updateBookingRoomRate);document.getElementById('bkOut')?.addEventListener('change',updateBookingRoomRate);updateBookingRoomRate();syncBookingGuestCount()},0);
+}
+function occupantHTML(o={},i){return `<div class="occupant" data-occ><div class="subhead"><b>Occupant ${i+1}</b><button class="btn small danger" onclick="this.closest('[data-occ]').remove();syncBookingGuestCount()">Remove</button></div><div class="form-grid" style="margin-top:9px">${field('Name','occName',o.name||'')}${field('DOB','occDob',o.dob||'')}${field('Relation','occRelation',o.relation||'')}${field('ID type','occIdType',o.idType||'')}${field('ID number','occIdNumber',o.idNumber||'')}${field('Phone','occPhone',o.phone||'')}<div class="field full"><label>ID photo</label><input type="file" accept="image/*" capture="environment" data-occ-photo><button type="button" class="btn small" onclick="demoOCR(this)">Scan / OCR</button></div></div></div>`}
+function vehicleHTML(v={},i){return `<div class="vehicle" data-veh><div class="subhead"><b>Vehicle ${i+1}</b><button class="btn small danger" onclick="this.closest('[data-veh]').remove()">Remove</button></div><div class="form-grid" style="margin-top:9px">${field('Registration number','vehReg',v.reg||'')}${field('Type','vehType',v.type||'Car')}<div class="field full"><label>Vehicle photo / OCR</label><input type="file" accept="image/*" capture="environment" data-veh-photo><button type="button" class="btn small" onclick="demoOCR(this)">Scan / OCR</button></div></div></div>`}
+function addOccupantField(){const c=document.getElementById('occList');c.insertAdjacentHTML('beforeend',occupantHTML({},c.querySelectorAll('[data-occ]').length));syncBookingGuestCount()}
+function addVehicleField(){const c=document.getElementById('vehList');c.insertAdjacentHTML('beforeend',vehicleHTML({},c.querySelectorAll('[data-veh]').length))}
+function demoOCR(btn){toast('OCR accepts camera or uploaded image in the Flutter production layer; both use the same editable OCR pipeline.')}
+function saveBookingForm(id){
+ const name=document.getElementById('bkGuest')?.value?.trim()||'Guest', phone=document.getElementById('bkPhone')?.value?.trim()||'';
+ let g=DB.guests.find(x=>x.name.toLowerCase()===name.toLowerCase()&&x.phone===phone);
+ if(!g){g={id:'g'+Date.now(),name,phone,email:'',idType:'',idNumber:'',idPhoto:'',occupants:[],vehicles:[]};DB.guests.push(g)}
+ g.idType=document.getElementById('bkIdType')?.value?.trim()||g.idType||'';g.idNumber=document.getElementById('bkIdNumber')?.value?.trim()||g.idNumber||'';
+ const roomId=document.getElementById('bkRoom').value, r=DB.rooms.find(x=>x.id===roomId), checkIn=document.getElementById('bkIn').value, checkOut=document.getElementById('bkOut').value;
+ if(!r){toast('Select a room');return}
+ if(!id&&['occupied','reserved','cleaning','maintenance'].includes(r.status)){toast(`Room ${r.number} is not available`);return}
+ const base=Number(r.rate||0)*nightsBetween(checkIn,checkOut), discount=Math.max(0,Number(document.getElementById('bkDiscount').value||0)), paid=Math.max(0,Number(document.getElementById('bkPaid').value||0));
+ const occ=[...document.querySelectorAll('[data-occ]')].map(x=>({id:'o'+Date.now()+Math.random(),name:x.querySelector('[data-setting="occName"]')?.value||'',dob:x.querySelector('[data-setting="occDob"]')?.value||'',relation:x.querySelector('[data-setting="occRelation"]')?.value||'',idType:x.querySelector('[data-setting="occIdType"]')?.value||'',idNumber:x.querySelector('[data-setting="occIdNumber"]')?.value||'',phone:x.querySelector('[data-setting="occPhone"]')?.value||'',idPhoto:''}));
+ const veh=[...document.querySelectorAll('[data-veh]')].map(x=>({id:'v'+Date.now()+Math.random(),reg:x.querySelector('[data-setting="vehReg"]')?.value||'',type:x.querySelector('[data-setting="vehType"]')?.value||'Car',photo:''}));
+ g.occupants=occ;g.vehicles=veh;
+ const data={guestId:g.id,roomId,checkIn,checkOut,guests:1+occ.length,base,discount,paid,notes:document.getElementById('bkNotes').value};
+ if(id){const b=DB.bookings.find(x=>x.id===id);if(!b)return;Object.assign(b,data);b.guestId=g.id;b.charges=b.charges||[];const roomCharge=b.charges.find(c=>c.item==='Room charges');if(roomCharge){roomCharge.qty=nightsBetween(checkIn,checkOut);roomCharge.rate=r.rate;roomCharge.amount=base;roomCharge.at=checkIn}else b.charges.unshift({id:'c'+Date.now(),item:'Room charges',qty:nightsBetween(checkIn,checkOut),rate:r.rate,amount:base,at:checkIn});}
+ else{const b={id:'b'+Date.now(),sr:'BKG-'+String(DB.seq.booking++).padStart(6,'0'),...data,status:'active',charges:[{id:'c'+Date.now(),item:'Room charges',qty:nightsBetween(checkIn,checkOut),rate:r.rate,amount:base,at:checkIn}],payments:paid?[{id:'p'+Date.now(),amount:paid,method:'Unspecified',status:'verified',at:new Date().toISOString(),ref:'MANUAL'}]:[]};DB.bookings.unshift(b);r.status='occupied'}
+ audit(id?'Booking edited':'Booking created',id||DB.bookings[0].sr);save();closeModal();showPage('bookings');toast(`Booking saved · ${1+occ.length} guest${occ.length?'s':''} · ${money(base)} room charges`);
+}
+function openGuest(id){
+ const g=id?DB.guests.find(x=>x.id===id):null;
+ pendingGuestPhoto=g?.idPhoto||'';
+ openModal(g?'Edit guest':'Add guest',`<div class="form-grid">
+ ${field('Full name','gName',g?.name||'')}${field('Phone / WhatsApp','gPhone',g?.phone||'')}${field('Email','gEmail',g?.email||'')}
+ ${field('ID type','gIdType',g?.idType||'')}${field('ID number','gIdNumber',g?.idNumber||'')}
+ <div class="field full"><label>Government ID photo — camera or upload</label><input id="gPhotoCamera" type="file" accept="image/*" capture="environment" onchange="previewGuestPhoto(event)"><input id="gPhoto" type="file" accept="image/*" onchange="previewGuestPhoto(event)" style="margin-top:7px"><div class="actions"><button class="btn small" onclick="document.getElementById('gPhotoCamera').click()">Camera</button><button class="btn small" onclick="document.getElementById('gPhoto').click()">Upload photo</button><button class="btn small" onclick="demoOCR(this)">Scan / OCR</button></div><img id="gPhotoPreview" class="photo" style="${g?.idPhoto?'':'display:none'}" src="${g?.idPhoto||''}"></div>
+ </div>
+ <div class="subcard"><div class="subhead"><b>Occupants (<span id="guestOccCount">${g?.occupants?.length||0}</span>)</b><button class="btn small" onclick="addGuestOccupant()">＋ Add occupant</button></div><div id="guestOccList">${(g?.occupants||[]).map((o,i)=>occupantHTML(o,i)).join('')}</div></div>
+ <div class="subcard"><div class="subhead"><b>Vehicles (${g?.vehicles?.length||0})</b><button class="btn small" onclick="addGuestVehicle()">＋ Add vehicle</button></div><div id="guestVehList">${(g?.vehicles||[]).map((v,i)=>vehicleHTML(v,i)).join('')}</div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveGuest('${id||''}')">Save guest</button>`);
+}
+let pendingGuestPhoto='';
+function previewGuestPhoto(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{pendingGuestPhoto=r.result;const p=document.getElementById('gPhotoPreview');if(p){p.src=r.result;p.style.display='block'}};r.readAsDataURL(f)}
+function updateGuestOccupantCount(){const c=document.querySelectorAll('#guestOccList [data-occ]').length;const el=document.getElementById('guestOccCount');if(el)el.textContent=c}
+function addGuestOccupant(){const c=document.getElementById('guestOccList');c.insertAdjacentHTML('beforeend',occupantHTML({},c.querySelectorAll('[data-occ]').length));updateGuestOccupantCount()}
+function addGuestVehicle(){const c=document.getElementById('guestVehList');c.insertAdjacentHTML('beforeend',vehicleHTML({},c.querySelectorAll('[data-veh]').length))}
+function saveGuest(id){
+ const name=document.getElementById('gName').value.trim(), phone=document.getElementById('gPhone').value.trim();
+ let g=id?DB.guests.find(x=>x.id===id):{id:'g'+Date.now(),occupants:[],vehicles:[]};if(!g)return;
+ g.name=name;g.phone=phone;g.email=document.getElementById('gEmail').value;g.idType=document.getElementById('gIdType').value;g.idNumber=document.getElementById('gIdNumber').value;if(pendingGuestPhoto)g.idPhoto=pendingGuestPhoto;
+ g.occupants=[...document.querySelectorAll('#guestOccList [data-occ]')].map(x=>({id:'o'+Date.now()+Math.random(),name:x.querySelector('[data-setting="occName"]')?.value||'',dob:x.querySelector('[data-setting="occDob"]')?.value||'',relation:x.querySelector('[data-setting="occRelation"]')?.value||'',idType:x.querySelector('[data-setting="occIdType"]')?.value||'',idNumber:x.querySelector('[data-setting="occIdNumber"]')?.value||'',phone:x.querySelector('[data-setting="occPhone"]')?.value||'',idPhoto:''}));
+ g.vehicles=[...document.querySelectorAll('#guestVehList [data-veh]')].map(x=>({id:'v'+Date.now()+Math.random(),reg:x.querySelector('[data-setting="vehReg"]')?.value||'',type:x.querySelector('[data-setting="vehType"]')?.value||'Car',photo:''}));
+ if(!id)DB.guests.push(g);audit(id?'Guest edited':'Guest created',g.name);save();pendingGuestPhoto='';closeModal();showPage('guests');toast(`Guest saved · ${1+g.occupants.length} total guest${g.occupants.length?'s':''}`);
+}
+
+function openCharge(bid){
+ openModal('Add folio charge',`<div class="form-grid">${field('Item / product','chItem','')}${field('Quantity','chQty',1)}${field('Unit price','chRate',0)}<div class="field"><label>Source</label><select id="chSource"><option>POS</option><option>Food</option><option>Room service</option><option>Other</option></select></div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveCharge('${bid}')">Post charge</button>`);
+}
+function saveCharge(bid){const b=DB.bookings.find(x=>x.id===bid),item=document.querySelector('[data-setting="chItem"]').value,qty=Number(document.querySelector('[data-setting="chQty"]').value),rate=Number(document.querySelector('[data-setting="chRate"]').value);b.charges.push({id:'c'+Date.now(),item,qty,rate,amount:qty*rate,at:new Date().toISOString()});audit('Folio charge posted',`${item} × ${qty} · ${b.sr}`);save();closeModal();showPage('folio');toast('Charge posted')}
+function recordPayment(bid){
+ openModal('Record verified payment',`<div class="form-grid">${field('Amount','payAmount',due(DB.bookings.find(x=>x.id===bid)))}<div class="field"><label>Method</label><select id="payMethod"><option>UPI</option><option>Cash</option><option>Card</option><option>Bank</option></select></div>${field('Transaction reference','payRef','')}</div><label class="check" style="margin-top:12px"><input id="payVerify" type="checkbox"> Payment verified</label>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="commitPayment('${bid}')">Commit payment</button>`);
+}
+function commitPayment(bid){if(!document.getElementById('payVerify').checked){toast('Verify the payment before committing');return}const b=DB.bookings.find(x=>x.id===bid),amt=Number(document.querySelector('[data-setting="payAmount"]').value),method=document.getElementById('payMethod').value,ref=document.querySelector('[data-setting="payRef"]').value||'MANUAL-'+Date.now();if(!amt||amt>due(b)){toast('Invalid amount');return}b.paid+=amt;b.payments.push({id:'p'+Date.now(),amount:amt,method,status:'verified',at:new Date().toISOString(),ref});audit('Payment verified',`${money(amt)} · ${b.sr} · ${ref}`);save();closeModal();showPage('folio');if(DB.settings.paymentAnnouncement)paymentAnnouncement(b,amt,ref);else toast('Payment committed');}
+function paymentAnnouncement(b,amt,ref){const g=guest(b),r=room(b);openModal('✓ Payment received',`<div class="card" style="box-shadow:none;background:#f2fbf9"><h2 style="margin-top:0">${money(amt)}</h2><b>${g?.name||'Guest'}</b><div>Room ${r?.number||'-'} · ${b.sr}</div><div style="margin-top:10px">Remaining due: <b>${money(due(b))}</b></div><div class="muted">Verified transaction: ${ref}</div></div>`,'<button class="btn primary" onclick="closeModal()">Done</button>')}
+
+function openExpense(id){
+ const e=id&&DB.expenses.find(x=>x.id===id);openModal(e?'Edit expense':'Add expense',`<div class="form-grid">${field('Title','exTitle',e?.title||'')}${field('Amount','exAmount',e?.amount||0)}${field('Category','exCategory',e?.category||'Operations')}</div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveExpense('${id||''}')">Save</button>`);
+}
+function saveExpense(id){const title=document.querySelector('[data-setting="exTitle"]').value,amount=Number(document.querySelector('[data-setting="exAmount"]').value),category=document.querySelector('[data-setting="exCategory"]').value;if(id){let e=DB.expenses.find(x=>x.id===id);e.title=title;e.amount=amount;e.category=category;audit('Expense edited',title)}else{DB.expenses.unshift({id:'e'+Date.now(),title,amount,category,at:new Date().toISOString(),status:'active'});audit('Expense created',title)}save();closeModal();showPage('expenses');toast('Expense saved')}
+function voidExpense(id){const e=DB.expenses.find(x=>x.id===id);if(!e)return;if(!confirm(`Void ${e.title} for ${money(e.amount)}?`))return;e.status='void';audit('Expense voided',`${e.title} · ${money(e.amount)}`);save();showPage('expenses');toast('Expense voided')}
+
+function openInventory(id){
+ const i=id&&DB.inventory.find(x=>x.id===id);
+ openModal(i?'Edit inventory item':'Add inventory item',`<div class="form-grid">${field('Item name','invName',i?.name||'')}${field('Unit','invUnit',i?.unit||'piece')}${field('Sell price','invSell',i?.sell||0)}${field('Reorder level','invReorder',i?.reorder||0)}</div><div class="muted" style="margin-top:10px">Current stock: <b>${i?remaining(i):0}</b>. Purchases and sales are recorded as transactions, so a new purchase never overwrites old stock.</div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveInventory('${id||''}')">Save item</button>`);
+}
+function saveInventory(id){
+ const d={name:document.getElementById('invName').value.trim(),unit:document.getElementById('invUnit').value.trim()||'piece',sell:Math.max(0,Number(document.getElementById('invSell').value||0)),reorder:Math.max(0,Number(document.getElementById('invReorder').value||0))};
+ if(!d.name){toast('Item name is required');return}
+ if(id)Object.assign(DB.inventory.find(x=>x.id===id),d);
+ else DB.inventory.push({id:'i'+Date.now(),...d,opening:0,purchased:0,issued:0,waste:0,cycleStartedAt:new Date().toISOString()});
+ audit(id?'Inventory item edited':'Inventory item created',d.name);save();closeModal();showPage('pos');
+}
+function openInventoryPurchase(itemId){
+ const i=itemId&&DB.inventory.find(x=>x.id===itemId);
+ openModal('Record inventory purchase',`<div class="form-grid"><div class="field full"><label>Item</label><select id="purchaseItem">${DB.inventory.map(x=>`<option value="${x.id}" ${x.id===itemId?'selected':''}>${esc(x.name)} · current ${remaining(x)} ${esc(x.unit)}</option>`).join('')}</select></div>${field('Quantity purchased','purchaseQty',1)}${field('Unit purchase cost','purchaseCost',0)}${field('Supplier / reference','purchaseRef','')}</div><div class="muted">This adds to existing stock. It does not replace previous purchases.</div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="commitInventoryPurchase()">Add purchase</button>`);
+}
+function commitInventoryPurchase(){
+ const itemId=document.getElementById('purchaseItem').value,i=DB.inventory.find(x=>x.id===itemId),qty=Number(document.getElementById('purchaseQty').value),cost=Number(document.getElementById('purchaseCost').value||0),ref=document.getElementById('purchaseRef').value||'';
+ if(!i||qty<=0||cost<0){toast('Enter valid purchase details');return}
+ DB.inventoryLedger.push({id:'t'+Date.now(),type:'purchase',itemId,qty,unitCost:cost,amount:qty*cost,at:new Date().toISOString(),ref});
+ audit('Inventory purchase',`${i.name} +${qty} ${i.unit} · ${money(qty*cost)}`);save();closeModal();showPage('pos');toast(`${qty} ${i.unit} added to ${i.name}`);
+}
+function issuePOS(itemId){
+ const i=DB.inventory.find(x=>x.id===itemId),active=DB.bookings.filter(b=>b.status==='active');if(!active.length){toast('No active stay available');return}
+ openModal('Sell / issue inventory to guest',`<div class="form-grid"><div class="field full"><label>Stay</label><select id="issueBooking">${active.map(b=>`<option value="${b.id}">${b.sr} · Room ${room(b)?.number} · ${guest(b)?.name}</option>`).join('')}</select></div>${field('Quantity','issueQty',1)}${field('Price per unit','issueRate',i.sell)}</div><div class="muted">Available stock: <b>${remaining(i)} ${i.unit}</b>. The sale is committed to both inventory and the guest folio in one save.</div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="commitIssue('${itemId}')">Sell + post folio</button>`);
+}
+function commitIssue(itemId){
+ const i=DB.inventory.find(x=>x.id===itemId),qty=Number(document.getElementById('issueQty').value),rate=Number(document.getElementById('issueRate').value),bid=document.getElementById('issueBooking').value,b=DB.bookings.find(x=>x.id===bid);
+ if(!i||!b||qty<=0||qty>remaining(i)||rate<0){toast('Invalid quantity, price, or insufficient stock');return}
+ const now=new Date().toISOString(),amount=qty*rate;
+ DB.inventoryLedger.push({id:'t'+Date.now(),type:'sale',itemId,qty,unitPrice:rate,amount,at:now,bookingId:bid,guestId:b.guestId,note:'POS sale'});
+ b.charges=b.charges||[];b.charges.push({id:'c'+Date.now(),item:i.name,qty,rate,amount,at:now,source:'POS',inventoryTransactionId:'t'+Date.now()});
+ audit('POS sale',`${i.name} × ${qty} · ${money(amount)} · ${b.sr}`);save();closeModal();showPage('pos');toast(`${i.name}: ${qty} sold · ${money(amount)} posted to folio`);
+}
+function resetInventoryCycle(){
+ if(!confirm('Start a new stock cycle? Current stock becomes the new opening balance. All old transactions remain in the all-time ledger.'))return;
+ const now=new Date().toISOString();
+ DB.inventory.forEach(i=>{const current=remaining(i);i.opening=current;i.cycleStartedAt=now;i.purchased=0;i.issued=0;i.waste=0});
+ audit('Inventory cycle reset','Current stock moved to new opening balances; history preserved');save();showPage('pos');toast('Inventory cycle reset. Historical records preserved.');
+}
+function inventoryHistory(id){
+ const i=DB.inventory.find(x=>x.id===id); if(!i)return;
+ const rows=DB.inventoryLedger.filter(t=>t.itemId===id).sort((a,b)=>new Date(b.at)-new Date(a.at));
+ openModal(`${esc(i.name)} · Full inventory history`,`<div class="row"><span>Current stock <b>${remaining(i)} ${esc(i.unit)}</b></span><span>Sell price <b>${money(i.sell)}</b></span></div><div class="list" style="margin-top:12px">${rows.map(t=>`<div class="item"><div class="item-head"><div><b>${t.type.toUpperCase()}</b><div class="muted">${fmt(t.at)} · ${t.qty} ${esc(i.unit)}</div></div><b>${t.amount?money(t.amount):''}</b></div><div class="muted">${esc(t.note||t.ref||'')}</div></div>`).join('')||'<div class="empty">No history</div>'}</div>`,`<button class="btn" onclick="exportInventoryReport('All Time','csv')">Export all inventory</button><button class="btn primary" onclick="closeModal()">Close</button>`);
+}
+function inventoryBalanceSheet(period){
+ const r=inventoryReport(period);
+ const byItem=DB.inventory.map(i=>{const rows=r.rows.filter(t=>t.itemId===i.id);return {name:i.name,purchase:rows.filter(t=>t.type==='purchase').reduce((s,t)=>s+Number(t.amount||0),0),sales:rows.filter(t=>t.type==='sale').reduce((s,t)=>s+Number(t.amount||0),0),soldQty:rows.filter(t=>t.type==='sale').reduce((s,t)=>s+Number(t.qty||0),0),purchaseQty:rows.filter(t=>t.type==='purchase').reduce((s,t)=>s+Number(t.qty||0),0)}}).filter(x=>x.purchase||x.sales||x.soldQty||x.purchaseQty);
+ openModal(`Inventory balance sheet · ${period}`,`<div class="grid three">${kpi('Sales / income',money(r.sales),'Inventory sold')}${kpi('Purchases / expense',money(r.purchased),'Stock bought')}${kpi('Net',money(r.net),'Income − purchase expense')}</div><div class="row" style="margin:14px 0"><span>Purchased qty <b>${r.qtyPurchased}</b></span><span>Sold qty <b>${r.qtySold}</b></span><span>Waste qty <b>${r.waste}</b></span></div><div class="list">${byItem.map(x=>`<div class="item"><div class="item-head"><b>${esc(x.name)}</b><b>${money(x.sales-x.purchase)}</b></div><div class="muted">Bought ${x.purchaseQty} · Sold ${x.soldQty} · Income ${money(x.sales)} · Expense ${money(x.purchase)}</div></div>`).join('')||'<div class="empty">No inventory activity for this period</div>'}</div>`,`<button class="btn" onclick="exportInventoryReport('${period}','csv')">Export CSV</button><button class="btn" onclick="exportInventoryReport('${period}','json')">Export JSON</button><button class="btn primary" onclick="closeModal()">Close</button>`);
+}
+function exportInventoryReport(period,format){
+ const r=inventoryReport(period),rows=[['Date','Type','Item','Qty','Unit price/cost','Amount','Booking','Guest']];
+ r.rows.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(t=>{const i=DB.inventory.find(x=>x.id===t.itemId),b=t.bookingId?DB.bookings.find(x=>x.id===t.bookingId):null;rows.push([t.at,t.type,i?.name||'',t.qty,t.unitPrice??t.unitCost??'',t.amount||0,b?.sr||'',guest(b)?.name||''])});
+ if(format==='json'){downloadBlob(new Blob([JSON.stringify({period,summary:r,rows:r.rows},null,2)],{type:'application/json'}),`inventory-${period.toLowerCase().replaceAll(' ','-')}.json`);return}
+ const csv=rows.map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\n');downloadBlob(new Blob([csv],{type:'text/csv'}),`inventory-${period.toLowerCase().replaceAll(' ','-')}.csv`);
+}
+function exportInventoryRecord(id){
+ const t=DB.inventoryLedger.find(x=>x.id===id);if(!t){toast('Record not found');return}const i=DB.inventory.find(x=>x.id===t.itemId),b=t.bookingId?DB.bookings.find(x=>x.id===t.bookingId):null;
+ const csv=[['Date','Type','Item','Qty','Unit price/cost','Amount','Booking','Guest'],[t.at,t.type,i?.name||'',t.qty,t.unitPrice??t.unitCost??'',t.amount||0,b?.sr||'',guest(b)?.name||'']].map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\n');downloadBlob(new Blob([csv],{type:'text/csv'}),`inventory-record-${id}.csv`);
+}
+
+function setRoomStatus(id,status){const r=DB.rooms.find(x=>x.id===id);r.status=status;audit('Room status changed',`${r.number} → ${status}`);save();showPage('rooms');toast(`Room ${r.number}: ${status}`)}
+function openRoomEdit(id){const r=id&&DB.rooms.find(x=>x.id===id);openModal(r?'Edit room':'Add room',`<div class="form-grid">${field('Room number','rmNumber',r?.number||'')}${field('Type','rmType',r?.type||'Standard')}${field('Rate','rmRate',r?.rate||0)}<div class="field"><label>Status</label><select id="rmStatus">${['available','occupied','reserved','cleaning','maintenance'].map(s=>`<option ${s===r?.status?'selected':''}>${s}</option>`).join('')}</select></div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveRoom('${id||''}')">Save</button>`)}
+function saveRoom(id){const d={number:document.querySelector('[data-setting="rmNumber"]').value,type:document.querySelector('[data-setting="rmType"]').value,rate:Number(document.querySelector('[data-setting="rmRate"]').value),status:document.getElementById('rmStatus').value};if(id)Object.assign(DB.rooms.find(x=>x.id===id),d);else DB.rooms.push({id:'r'+Date.now(),...d});save();closeModal();showPage('rooms');toast('Room saved')}
+
+function openReservation(id){
+ const x=id&&DB.reservations.find(r=>r.id===id);
+ const options=DB.rooms.map(r=>`<option value="${r.number}" ${r.number===room({roomId:x?.roomId})?.number?'selected':''} ${!x&&['occupied','reserved','cleaning','maintenance'].includes(r.status)?'disabled':''}>${r.number} · ${r.type} · ${money(r.rate)} · ${r.status}</option>`).join('');
+ openModal(x?'Edit reservation':'New reservation',`<div class="form-grid">${field('Guest name','rsGuest',guest({guestId:x?.guestId})?.name||'')}<div class="field"><label>Room · rate auto shown</label><select id="rsRoom">${options}</select></div>${field('From','rsFrom',x?.from||new Date().toISOString().slice(0,16))}${field('To','rsTo',x?.to||new Date(Date.now()+86400000).toISOString().slice(0,16))}</div>`,`<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveReservation('${id||''}')">Save</button>`);
+}
+function saveReservation(id){const name=document.querySelector('[data-setting="rsGuest"]').value,phone='',g=DB.guests.find(x=>x.name.toLowerCase()===name.toLowerCase())||{id:'g'+Date.now(),name,phone,email:'',idType:'',idNumber:'',idPhoto:'',occupants:[],vehicles:[]};if(!DB.guests.includes(g))DB.guests.push(g);const num=document.querySelector('[data-setting="rsRoom"]').value,r=DB.rooms.find(x=>x.number===num)||DB.rooms[0];if(r&&['occupied','reserved','cleaning','maintenance'].includes(r.status)&&!id){toast(`Room ${r.number} is not available`);return}const d={guestId:g.id,roomId:r.id,from:document.querySelector('[data-setting="rsFrom"]').value,to:document.querySelector('[data-setting="rsTo"]').value,status:'confirmed',rate:Number(r?.rate||0)};if(id)Object.assign(DB.reservations.find(x=>x.id===id),d);else DB.reservations.unshift({id:'res'+Date.now(),sr:'RES-'+String(DB.seq.reservation++).padStart(6,'0'),...d});save();closeModal();showPage('reservations')}
+function convertReservation(id){const x=DB.reservations.find(r=>r.id===id);if(!x)return;const r=room({roomId:x.roomId});const g=guest({guestId:x.guestId});const b={id:'b'+Date.now(),sr:'BKG-'+String(DB.seq.booking++).padStart(6,'0'),guestId:g.id,roomId:r.id,checkIn:x.from,checkOut:x.to,guests:1,base:r.rate,discount:0,paid:0,status:'active',charges:[{id:'c'+Date.now(),item:'Room charges',qty:1,rate:r.rate,amount:r.rate,at:x.from}],payments:[]};DB.bookings.unshift(b);x.status='converted';r.status='occupied';audit('Reservation converted',`${x.sr} → ${b.sr}`);save();showPage('bookings');toast('Reservation converted to active stay')}
+function cancelReservation(id){const x=DB.reservations.find(r=>r.id===id);if(!x)return;if(!confirm('Cancel this reservation?'))return;x.status='cancelled';audit('Reservation cancelled',x.sr);save();showPage('reservations')}
+function checkout(id){const b=DB.bookings.find(x=>x.id===id);if(due(b)){toast(`Outstanding ${money(due(b))} must be handled before checkout`);return}b.status='checked_out';const r=room(b);if(r)r.status='cleaning';audit('Checkout completed',b.sr);save();showPage('bookings');toast(`Checkout complete. Room ${r?.number} needs cleaning.`)}
+
+function openFolio(id){if(id){const el=document.querySelector(`[data-folio="${id}"]`);if(el)el.scrollIntoView()}}
+function shareInvoice(id){viewInvoice(id)}
+function viewInvoice(id){
+ const b=DB.bookings.find(x=>x.id===id); if(!b){toast('Booking not found');return}
+ const g=guest(b),r=room(b);
+ const qr=`https://quickchart.io/qr?size=900&text=${encodeURIComponent(`upi://pay?pa=${DB.settings.upi||''}&pn=${DB.settings.hotelName||''}&am=${Math.max(0,due(b)).toFixed(2)}&cu=INR&tn=${b.sr}`)}`;
+ openModal('Pending invoice',`<div id="invoiceShareCard" class="card" style="box-shadow:none">
+  <div class="row" style="justify-content:space-between"><div><h2 style="margin:0">${esc(DB.settings.hotelName)}</h2><div>${esc(DB.settings.address)}</div><div>${esc(DB.settings.phone)}</div></div><b>PENDING INVOICE</b></div>
+  <hr><b>${esc(b.sr)}</b> · Room ${esc(r?.number||'')}<div style="margin:8px 0">${esc(g?.name||'')} · ${esc(g?.phone||'')}</div>
+  ${b.charges.map(c=>`<div class="row" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee"><span>${esc(c.item)} × ${c.qty}</span><b>${money(c.amount)}</b></div>`).join('')}
+  <div class="row" style="justify-content:space-between;margin-top:10px"><b>Total</b><b>${money(total(b))}</b></div>
+  <div class="row" style="justify-content:space-between"><span>Paid</span><b>${money(b.paid)}</b></div>
+  <div class="row" style="justify-content:space-between;font-size:24px;margin-top:8px"><b>AMOUNT DUE</b><b class="due">${money(due(b))}</b></div>
+  <div class="qr-box"><div><b>SCAN / EXTRACT UPI PAYMENT QR</b></div><img src="${qr}" alt="Large UPI QR"><b>${esc(DB.settings.upi||'')}</b></div>
+  <div class="muted" style="margin-top:12px">${esc(DB.settings.checkoutMessage||'')}</div>
+ </div>
+ <div class="share-grid" style="margin-top:12px">
+  <button class="btn" onclick="printInvoice('${id}')">PDF / Print</button>
+  <button class="btn" onclick="invoiceImage('${id}','png')">PNG</button>
+  <button class="btn" onclick="invoiceImage('${id}','jpg')">JPG</button>
+  <button class="btn primary" onclick="shareInvoiceWhatsApp('${id}')">WhatsApp guest</button>
+ </div>`,
+ `<button class="btn" onclick="closeModal()">Done</button>`);
+}
+function shareInvoiceWhatsApp(id){
+ const b=DB.bookings.find(x=>x.id===id),g=guest(b);if(!b||!g?.phone){toast('Guest WhatsApp number is missing');return}
+ const text=`${DB.settings.hotelName}\nPending invoice ${b.sr}\nRoom ${room(b)?.number||''}\nAmount due: ${money(due(b))}\nUPI: ${DB.settings.upi||''}\nPlease use the attached/shared invoice QR image.`;
+ const url=`https://wa.me/${String(g.phone).replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
+ window.open(url,'_blank','noopener');
+}
+function invoiceImage(id,format){
+ const b=DB.bookings.find(x=>x.id===id);if(!b)return;
+ const g=guest(b),r=room(b),qr=`https://quickchart.io/qr?size=900&text=${encodeURIComponent(`upi://pay?pa=${DB.settings.upi||''}&pn=${DB.settings.hotelName||''}&am=${Math.max(0,due(b)).toFixed(2)}&cu=INR&tn=${b.sr}`)}`;
+ const w=window.open('','_blank');if(!w){toast('Allow popups to generate the image');return}
+ w.document.write(`<html><body style="font-family:Arial;background:#fff;padding:24px"><div style="max-width:760px;margin:auto;border:1px solid #ddd;padding:24px"><h1>${esc(DB.settings.hotelName)}</h1><div>${esc(DB.settings.address)}<br>${esc(DB.settings.phone)}</div><h2>PENDING INVOICE · ${esc(b.sr)}</h2><p><b>${esc(g?.name||'')}</b> · Room ${esc(r?.number||'')}</p>${b.charges.map(c=>`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee"><span>${esc(c.item)} × ${c.qty}</span><b>${money(c.amount)}</b></div>`).join('')}<h2>AMOUNT DUE: ${money(due(b))}</h2><div style="text-align:center"><img src="${qr}" style="width:520px;height:520px;max-width:90vw"><div>${esc(DB.settings.upi||'')}</div></div></div></body></html>`);
+ w.document.close();toast(`${format.toUpperCase()} invoice image prepared; use browser save/share image.`);
+}
+
+function printInvoice(id){
+ const b=DB.bookings.find(x=>x.id===id); if(!b){toast('Booking not found');return}
+ const g=guest(b),r=room(b);
+ const rows=b.charges.map(c=>`<tr><td>${esc(c.item)} × ${c.qty}</td><td>${money(c.amount)}</td></tr>`).join('');
+ const qr=`https://quickchart.io/qr?size=600&text=${encodeURIComponent(`upi://pay?pa=${DB.settings.upi||''}&pn=${DB.settings.hotelName||''}&am=${Math.max(0,due(b)).toFixed(2)}&cu=INR&tn=${b.sr}`)}`;
+ const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(b.sr)}</title><style>body{font-family:Arial;padding:28px;max-width:760px;margin:auto;color:#123842}h1{font-family:Georgia;font-style:italic}table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #ddd}.due{font-size:24px;font-weight:800}.qr{text-align:center;margin-top:20px}.qr img{width:300px;height:300px}</style></head><body><h1>${esc(DB.settings.hotelName)}</h1><div>${esc(DB.settings.address)}<br>${esc(DB.settings.phone)}</div><h2>INVOICE · ${esc(b.sr)}</h2><p><b>${esc(g?.name||'')}</b> · Room ${esc(r?.number||'')}</p><table>${rows}</table><p>Total: <b>${money(total(b))}</b><br>Paid: <b>${money(b.paid)}</b><br><span class="due">Amount due: ${money(due(b))}</span></p><div class="qr"><b>PAYMENT QR</b><br><img src="${qr}"><div>${esc(DB.settings.upi||'')}</div></div><p>${esc(DB.settings.checkoutMessage||'')}</p></body></html>`;
+ const w=window.open('','_blank'); if(!w){toast('Allow popups to print the invoice');return}
+ w.document.open();w.document.write(html);w.document.close(); setTimeout(()=>w.print(),300);
+}
+function exportJSON(){downloadBlob(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),`${DB.settings.hotelName||'hotel'}-backup.json`)}
+function exportCSV(){
+ const rows=[['SR','Guest','Room','Status','Check In','Check Out','Total','Paid','Due']];
+ DB.bookings.forEach(b=>rows.push([b.sr,guest(b)?.name||'',room(b)?.number||'',b.status,b.checkIn,b.checkOut,total(b),b.paid,due(b)]));
+ const csv=rows.map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\n');
+ downloadBlob(new Blob([csv],{type:'text/csv'}),`${DB.settings.hotelName||'hotel'}-balance-sheet.csv`);
+}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}
+function balanceSheet(period){
+ const rows=DB.bookings.map(b=>`<div class="item"><b>${esc(b.sr)}</b> · ${esc(guest(b)?.name||'')} · Room ${esc(room(b)?.number||'')}<br>Total ${money(total(b))} · Paid ${money(b.paid)} · Due ${money(due(b))}</div>`).join('');
+ openModal(`${period} balance sheet`,rows||'<div class="empty">No records</div>',`<button class="btn" onclick="closeModal()">Close</button><button class="btn primary" onclick="exportCSV();closeModal()">Download CSV</button>`);
+}
+function guestHistory(id){
+ const rows=DB.bookings.filter(b=>b.guestId===id).map(b=>`<div class="item"><b>${esc(b.sr)}</b> · Room ${esc(room(b)?.number||'')}<br>${fmt(b.checkIn)} → ${fmt(b.checkOut)}<br>Total ${money(total(b))} · Due ${money(due(b))}</div>`).join('');
+ openModal('Guest history',rows||'<div class="empty">No booking history</div>');
+}
+function callGuest(phone){if(!phone){toast('No phone number');return}location.href=`tel:${String(phone).replace(/\D/g,'')}`}
+function msgGuest(phone){if(!phone){toast('No WhatsApp number');return}window.open(`https://wa.me/${String(phone).replace(/\D/g,'')}`,'_blank','noopener')}
+function setLogo(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{DB.settings.logo=r.result;save();refreshBrand();showPage('settings');toast('Logo saved')};r.readAsDataURL(f)}
+function refreshBrand(){document.getElementById('brandName').textContent=DB.settings.hotelName||'AURELIA 5★';const img=document.getElementById('brandLogo');img.src=DB.settings.logo||'';img.style.display=DB.settings.logo?'block':'none'}
+function saveSettings(){
+ document.querySelectorAll('[data-setting]').forEach(el=>{if(Object.prototype.hasOwnProperty.call(DB.settings,el.dataset.setting))DB.settings[el.dataset.setting]=el.value});
+ document.querySelectorAll('[data-setting-check]').forEach(el=>DB.settings[el.dataset.settingCheck]=el.checked);
+ save();refreshBrand();audit('Settings updated','Hotel identity / master features');save();showPage('settings');toast('Settings saved');
+}
+function searchAll(q){
+ q=q.trim().toLowerCase();if(!q)return[];const out=[];
+ DB.guests.forEach(g=>{if(`${g.name} ${g.phone} ${g.idNumber}`.toLowerCase().includes(q))out.push({group:'Guests',title:g.name,sub:`${g.phone||''} · ${g.idType||''}`,fn:()=>openGuest(g.id)})});
+ DB.rooms.forEach(r=>{if(`${r.number} ${r.type} ${r.status}`.toLowerCase().includes(q))out.push({group:'Rooms',title:`Room ${r.number}`,sub:`${r.type} · ${r.status}`,fn:()=>showPage('rooms')})});
+ DB.bookings.forEach(b=>{if(`${b.sr} ${guest(b)?.name||''}`.toLowerCase().includes(q))out.push({group:'Bookings',title:b.sr,sub:`${guest(b)?.name||''} · Room ${room(b)?.number||''}`,fn:()=>openBooking(b.id)})});
+ DB.reservations.forEach(x=>{if(`${x.sr} ${guest({guestId:x.guestId})?.name||''}`.toLowerCase().includes(q))out.push({group:'Reservations',title:x.sr,sub:guest({guestId:x.guestId})?.name||'',fn:()=>showPage('reservations')})});
+ DB.inventory.forEach(i=>{if(i.name.toLowerCase().includes(q))out.push({group:'POS',title:i.name,sub:`Remaining ${remaining(i)}`,fn:()=>showPage('pos')})});
+ return out.slice(0,30);
+}
+function initSearch(){
+ const input=document.getElementById('search'),box=document.getElementById('searchResults');
+ input.addEventListener('input',()=>{const rs=searchAll(input.value);box.innerHTML=rs.map((x,i)=>`<div class="sr" data-result="${i}"><b>${esc(x.title)}</b><small>${esc(x.group)} · ${esc(x.sub)}</small></div>`).join('');box.classList.toggle('show',rs.length>0);box.querySelectorAll('[data-result]').forEach(el=>el.onclick=()=>{rs[+el.dataset.result].fn();box.classList.remove('show')})});
+}
+setupNav();initSearch();refreshBrand();showPage('dashboard');window.addEventListener('beforeunload',save);
+</script>
+</body></html>
