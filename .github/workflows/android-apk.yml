@@ -1,9 +1,9 @@
-name: Enterprise PMS Android Debug APK
+name: Aurelia PMS Android Debug APK
 
 on:
   push:
     branches:
-      - enterprise-41-implementation
+      - aurelia-native-ui
   workflow_dispatch:
 
 permissions:
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout enterprise Android project
+      - name: Checkout Aurelia branch
         uses: actions/checkout@v4
         with:
-          ref: enterprise-41-implementation
+          ref: aurelia-native-ui
 
       - name: Setup Java 17
         uses: actions/setup-java@v5
@@ -29,18 +29,17 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Clean
-        run: ./gradlew clean --no-daemon
-
-      - name: Build debug APK
+      - name: Build Aurelia debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
 
       - name: Find APK
-        run: find app/build/outputs/apk -type f -name "*.apk" -print
+        run: |
+          echo "=== Aurelia APK ==="
+          find app/build/outputs/apk -type f -name "*.apk" -print
 
-      - name: Upload debug APK
+      - name: Upload Aurelia APK
         uses: actions/upload-artifact@v4
         with:
-          name: enterprise-pms-debug-apk
+          name: aurelia-pms-debug-apk
           path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
