@@ -85,7 +85,7 @@ fun HotelApp(viewModel: HotelViewModel) {
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = getSectionTitle(currentSection, enabledSections),
+                            text = getSectionTitle(currentSection),
                             color = AureliaColors.Muted,
                             fontSize = 12.sp
                         )
@@ -192,27 +192,76 @@ fun HotelApp(viewModel: HotelViewModel) {
 
                 "RESERVATIONS" -> ReservationsScreen(viewModel)
 
-                "BOOKINGS" -> BookingsListScreen(viewModel)
+                "BOOKINGS" -> BookingsListScreen(
+                            viewModel = viewModel,
+                            onNavigateToNewBooking = {
+                                viewModel.navigateTo("NEW_BOOKING")
+                            },
+                            onGenerateInvoice = { booking ->
+                                viewModel.selectedBookingForInvoice.value = booking
+                                viewModel.navigateTo("INVOICE_GENERATOR")
+                            },
+                            onOpenDetails = { booking ->
+                                viewModel.selectedBookingForInvoice.value = booking
+                                viewModel.navigateTo("GUEST_DETAILS")
+                            }
+                        )
 
                 "PAYMENTS" -> PaymentsScreen(viewModel)
 
-                "NEW_BOOKING" -> NewBookingScreen(viewModel)
+                "NEW_BOOKING" -> NewBookingScreen(
+                            viewModel = viewModel,
+                            onNavigateBack = { viewModel.navigateBack() },
+                            onBookingSaved = { viewModel.navigateTo("BOOKINGS") }
+                        )
 
                 "ROOMS" -> RoomsScreen(viewModel)
 
                 "CUSTOMERS" -> CustomersScreen(viewModel)
 
-                "GUEST_DETAILS" -> GuestDetailsScreen(viewModel)
+                "GUEST_DETAILS" -> {
+                            val booking = viewModel.selectedBookingForInvoice.value
+                            if (booking != null) {
+                                GuestDetailsScreen(
+                                    viewModel = viewModel,
+                                    booking = booking,
+                                    onEdit = {
+                                        viewModel.editingBooking.value = booking
+                                        viewModel.navigateTo("NEW_BOOKING")
+                                    },
+                                    onAddPayment = {
+                                        viewModel.navigateTo("PAYMENTS")
+                                    },
+                                    onGenerateInvoice = {
+                                        viewModel.selectedBookingForInvoice.value = booking
+                                        viewModel.navigateTo("INVOICE_GENERATOR")
+                                    }
+                                )
+                            } else {
+                                viewModel.navigateTo("BOOKINGS")
+                            }
+                        }
 
-                "INVOICES" -> InvoiceHistoryScreen(viewModel)
+                "INVOICES" -> InvoiceHistoryScreen(
+                            viewModel = viewModel
+                        )
 
-                "INVOICE_GENERATOR" -> InvoiceGeneratorScreen(viewModel)
+                "INVOICE_GENERATOR" -> InvoiceGeneratorScreen(
+                            viewModel = viewModel,
+                            onViewInvoices = {
+                                viewModel.navigateTo("INVOICES")
+                            }
+                        )
 
                 "EXPENSES" -> ExpensesScreen(viewModel)
 
                 "REPORTS" -> ReportsScreen(viewModel)
 
-                "SETTINGS" -> SettingsScreen(viewModel)
+                "SETTINGS" -> SettingsScreen(
+                            viewModel = viewModel,
+                            onNavigateToManageSections = { viewModel.navigateTo("MANAGE_SECTIONS") },
+                            onNavigateToBackup = { viewModel.navigateTo("BACKUP") }
+                        )
 
                 "BACKUP" -> BackupRestoreScreen(viewModel)
 
@@ -232,3 +281,32 @@ fun HotelApp(viewModel: HotelViewModel) {
         }
     }
 }
+
+private fun getSectionTitle(
+    currentSection: String
+): String {
+    return when (currentSection) {
+        "DASHBOARD" -> "Hotel command center"
+        "RESERVATIONS" -> "Reservations"
+        "BOOKINGS" -> "Stays"
+        "PAYMENTS" -> "Folio"
+        "NEW_BOOKING" -> "New booking"
+        "ROOMS" -> "Rooms"
+        "CUSTOMERS" -> "Guests"
+        "GUEST_DETAILS" -> "Guest details"
+        "INVOICES" -> "Invoices"
+        "INVOICE_GENERATOR" -> "Invoice"
+        "EXPENSES" -> "Expenses"
+        "REPORTS" -> "Reports"
+        "SETTINGS" -> "Settings"
+        "BACKUP" -> "Import / Export"
+        "FOOD" -> "POS / Food"
+        "SEARCH" -> "Search"
+        "MANAGE_SECTIONS" -> "Modules"
+        else -> currentSection
+            .replace('_', ' ')
+            .lowercase()
+            .replaceFirstChar { it.uppercase() }
+    }
+}
+

@@ -361,3 +361,123 @@ data class BackupMetadata(
     val recordsCount: Int = 0,
     val notes: String = ""
 )
+/**
+ * V6 RESTAURANT / POS
+ */
+
+/**
+ * V6 RESTAURANT / POS
+ *
+ * Made Food is customer-facing food prepared by the hotel.
+ * Restaurant ingredients are internal stock.
+ * Ready-made inventory is purchased finished stock.
+ */
+@Entity(
+    tableName = "made_foods",
+    indices = [Index(value = ["name"]), Index(value = ["isActive"])]
+)
+data class MadeFood(
+    @PrimaryKey val id: String,
+    val name: String,
+    val sellingPrice: Double = 0.0,
+    val unit: String = "plate",
+    val details: String = "",
+    val isActive: Boolean = true,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "restaurant_inventory",
+    indices = [Index(value = ["name"]), Index(value = ["isActive"])]
+)
+data class RestaurantInventoryItem(
+    @PrimaryKey val id: String,
+    val name: String,
+    val purchaseRate: Double = 0.0,
+    val unit: String = "kg",
+    val openingStock: Double = 0.0,
+    val reorderThreshold: Double = 0.0,
+    val isActive: Boolean = true,
+    val cycleStartedAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "ready_made_inventory",
+    indices = [Index(value = ["name"]), Index(value = ["isActive"])]
+)
+data class ReadyMadeInventoryItem(
+    @PrimaryKey val id: String,
+    val name: String,
+    val purchaseRate: Double = 0.0,
+    val sellingPrice: Double = 0.0,
+    val unit: String = "piece",
+    val openingStock: Double = 0.0,
+    val reorderThreshold: Double = 0.0,
+    val isActive: Boolean = true,
+    val cycleStartedAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "restaurant_inventory_ledger",
+    indices = [
+        Index(value = ["itemId"]),
+        Index(value = ["type"]),
+        Index(value = ["at"]),
+        Index(value = ["restaurantSaleId"])
+    ]
+)
+data class RestaurantInventoryLedger(
+    @PrimaryKey val id: String,
+    val itemId: String,
+    val type: String, // purchase, sale, waste
+    val quantity: Double,
+    val unitRate: Double = 0.0,
+    val amount: Double = 0.0,
+    val bookingId: String = "",
+    val restaurantSaleId: String = "",
+    val at: Long = System.currentTimeMillis(),
+    val note: String = ""
+)
+
+@Entity(
+    tableName = "restaurant_sales",
+    indices = [
+        Index(value = ["status"]),
+        Index(value = ["mode"]),
+        Index(value = ["bookingId"]),
+        Index(value = ["createdAt"])
+    ]
+)
+data class RestaurantSale(
+    @PrimaryKey val saleId: String,
+    val mode: String, // room, walkin
+    val bookingId: String = "",
+    val roomNumber: String = "",
+    val mobile: String = "",
+    val amount: Double = 0.0,
+    val paid: Double = 0.0,
+    val status: String = "OPEN", // OPEN, PARTIALLY_PAID, PAID, CLOSED
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "restaurant_sale_items",
+    indices = [Index(value = ["saleId"])]
+)
+data class RestaurantSaleItem(
+    @PrimaryKey val id: String,
+    val saleId: String,
+    val productId: String,
+    val productName: String,
+    val quantity: Double = 1.0,
+    val sellingPrice: Double = 0.0,
+    val total: Double = 0.0,
+    val productType: String = "MADE_FOOD" // MADE_FOOD, READY_MADE
+)
+
