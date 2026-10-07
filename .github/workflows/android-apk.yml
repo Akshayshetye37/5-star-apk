@@ -1,9 +1,9 @@
-name: Aurelia PMS Android Debug APK
+name: Aurelia V6 Android APK
 
 on:
   push:
     branches:
-      - aurelia-native-ui
+      - aurelia-v6-native
   workflow_dispatch:
 
 permissions:
@@ -11,37 +11,32 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    name: Build Aurelia V6 APK
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Aurelia branch
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: aurelia-native-ui
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v5
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
           cache: gradle
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew
+        run: chmod +x gradlew
 
-      - name: Build Aurelia debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
+      - name: Run Kotlin compilation
+        run: ./gradlew :app:compileDebugKotlin --no-daemon
 
-      - name: Find APK
-        run: |
-          echo "=== Aurelia APK ==="
-          find app/build/outputs/apk -type f -name "*.apk" -print
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
 
-      - name: Upload Aurelia APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: aurelia-pms-debug-apk
-          path: app/build/outputs/apk/**/*.apk
+          name: aurelia-v6-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-
-# Aurelia CI active
