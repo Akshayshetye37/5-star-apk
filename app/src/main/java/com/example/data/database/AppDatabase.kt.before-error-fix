@@ -191,31 +191,6 @@ private val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
     }
 }
 
-
-/**
- * Payment verification lifecycle.
- *
- * Existing payment rows were already authoritative ledger records
- * before verification lifecycle support existed, so historical rows
- * are migrated as VERIFIED.
- *
- * New offline/unverified captures explicitly use
- * PENDING_VERIFICATION and therefore do not reduce ledger balance.
- */
-private val MIGRATION_7_8_PAYMENT_VERIFICATION =
-    object : androidx.room.migration.Migration(7, 8) {
-        override fun migrate(
-            db: androidx.sqlite.db.SupportSQLiteDatabase
-        ) {
-            db.execSQL(
-                """
-                ALTER TABLE payments
-                ADD COLUMN verificationStatus TEXT NOT NULL DEFAULT 'VERIFIED'
-                """.trimIndent()
-            )
-        }
-    }
-
 @Database(
     entities = [
         HotelSettings::class,
@@ -238,7 +213,7 @@ private val MIGRATION_7_8_PAYMENT_VERIFICATION =
         FolioCharge::class,
         FinanceTransaction::class
     ],
-    version = 8,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -459,7 +434,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "hotel_billing_database.db"
                 )
                     .fallbackToDestructiveMigration(false)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8_PAYMENT_VERIFICATION)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .addCallback(DatabaseCallback(context))
                     .build()
                 INSTANCE = instance

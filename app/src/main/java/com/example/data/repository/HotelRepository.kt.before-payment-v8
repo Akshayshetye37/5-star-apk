@@ -417,7 +417,7 @@ class HotelRepository(private val database: AppDatabase) {
         notes: String = "",
         timestamp: Long = System.currentTimeMillis()
     ) = withContext(Dispatchers.IO) {
-        val result = recordVerifiedPaymentUseCase(
+        recordVerifiedPaymentUseCase(
             bookingId = bookingId,
             folioId = folioId,
             amount = amount,
@@ -431,84 +431,16 @@ class HotelRepository(private val database: AppDatabase) {
             notes = notes,
             timestamp = timestamp
         )
-
-        /*
-         * IMPORTANT:
-         *
-         * The authoritative payment use case executes its financial
-         * changes inside Room's transaction. It returns Success only
-         * after that transaction completes successfully.
-         *
-         * Therefore announcement is strictly post-commit.
-         */
-        if (result is com.example.data.domain.PaymentEngineResult.Success) {
-            /*
-             * Financial transaction is already committed at this point.
-             *
-             * Keep the existing UPI announcement service connected here,
-             * but do not depend on a repository-local settings DAO.
-             *
-             * The announcement manager owns the announcement behavior.
-             * Currency defaults to INR for the hotel PMS.
-             */
-            com.example.domain.upi.UpiPaymentAnnouncementManager
-                .announceReceivedAmount(
-                    amount = result.amount,
-                    currencySymbol = "₹"
-                )
-        }
-
-        result
     }
 
-    /**
-     * Captures an offline/unverified payment claim.
-     *
-     * This intentionally does NOT update:
-     * - folio balance
-     * - booking.paid
-     * - invoice paid/pending
-     *
-     * Only recordVerifiedPayment() creates the authoritative
-     * financial posting.
-     */
-    suspend fun capturePendingPayment(payment: Payment) =
-        withContext(Dispatchers.IO) {
-
-            require(payment.amount > 0.0) {
-                "Pending payment amount must be greater than zero."
-            }
-
-            val pending = payment.copy(
-                verificationStatus = "PENDING_VERIFICATION"
-            )
-
-            database.withTransaction {
-                val existing =
-                    paymentDao.getPaymentById(pending.paymentId)
-
-                if (existing == null) {
-                    paymentDao.insertPayment(pending)
-                }
-            }
-        }
-
     suspend fun recordPayment(payment: Payment) = withContext(Dispatchers.IO) {
-            require(payment.verificationStatus == "VERIFIED") {
-                "Legacy recordPayment() accepts only VERIFIED payments."
-            }
-
         database.withTransaction {
             paymentDao.insertPayment(payment)
             if (payment.bookingId.isNotBlank()) {
                 val booking = bookingDao.getBookingById(payment.bookingId)
                 if (booking != null) {
                     val allPayments = paymentDao.getPaymentsForBookingDirect(payment.bookingId)
-                    val totalPaidAmount = allPayments
-                        .filter {
-                            it.verificationStatus == "VERIFIED"
-                        }
-                        .sumOf { it.amount }
+                    val totalPaidAmount = allPayments.sumOf { it.amount }
                     bookingDao.updateBooking(booking.copy(paid = totalPaidAmount, updatedAt = System.currentTimeMillis()))
                 }
             }
@@ -516,11 +448,7 @@ class HotelRepository(private val database: AppDatabase) {
                 val invoice = invoiceDao.getInvoiceByNumber(payment.invoiceId)
                 if (invoice != null) {
                     val allPayments = paymentDao.getPaymentsForBookingDirect(invoice.bookingId)
-                    val totalPaidAmount = allPayments
-                        .filter {
-                            it.verificationStatus == "VERIFIED"
-                        }
-                        .sumOf { it.amount }
+                    val totalPaidAmount = allPayments.sumOf { it.amount }
                     val newPending = (invoice.grandTotal - totalPaidAmount).coerceAtLeast(0.0)
                     val status = if (newPending <= 0.0) "PAID" else if (totalPaidAmount > 0) "PARTIALLY_PAID" else "PENDING"
                     invoiceDao.updateInvoice(

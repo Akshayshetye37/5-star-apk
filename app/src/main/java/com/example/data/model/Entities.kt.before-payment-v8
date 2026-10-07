@@ -272,12 +272,6 @@ data class Payment(
     val paymentMethod: String = "Cash", // Cash, UPI, Google Pay, Card, Bank Transfer, Other
     val referenceNumber: String = "",
     val notes: String = "",
-      /**
-       * Payment authorization/verification lifecycle.
-       * Only VERIFIED payments are authoritative ledger entries.
-       * PENDING_VERIFICATION is not included in the ledger balance.
-       */
-      val verificationStatus: String = "VERIFIED",
     val createdAt: Long = System.currentTimeMillis(),
     val version: Int = 1,
     val lastModifiedTimestamp: Long = System.currentTimeMillis(),

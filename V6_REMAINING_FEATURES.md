@@ -1,0 +1,38 @@
+# Hotel POS — V6 Delta Audit
+
+Branch: aurelia-native-ui
+V6 source: Hotel_POS_EXACT_UI_V6.html
+
+| Feature | V6 | Native repo | Initial result |
+|---|---|---|---|
+| Payment | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| PENDING_VERIFICATION | NO | YES | NOT IN V6 |
+| VERIFIED | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| GPay | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Restaurant | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| POS | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Made Food | YES | NO | MISSING — IMPLEMENT |
+| Restaurant Inventory | YES | NO | MISSING — IMPLEMENT |
+| Ready-made | YES | NO | MISSING — IMPLEMENT |
+| Walk-in | YES | NO | MISSING — IMPLEMENT |
+| Terms & Conditions | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| WhatsApp | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Invoice | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Folio | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Inventory | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Housekeeping | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Reservations | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Bookings | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Guests | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Rooms | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Expenses | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Reports | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Audit | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Import | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+| Export | YES | YES | ALREADY PRESENT — REVIEW BEHAVIOUR |
+
+## Important
+
+This is a marker audit only.
+A feature marked PRESENT must still be behaviour-checked.
+The V6 HTML is the exact UI/behaviour master.

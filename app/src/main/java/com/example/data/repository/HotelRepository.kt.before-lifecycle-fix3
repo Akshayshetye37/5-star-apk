@@ -494,21 +494,13 @@ class HotelRepository(private val database: AppDatabase) {
         }
 
     suspend fun recordPayment(payment: Payment) = withContext(Dispatchers.IO) {
-            require(payment.verificationStatus == "VERIFIED") {
-                "Legacy recordPayment() accepts only VERIFIED payments."
-            }
-
         database.withTransaction {
             paymentDao.insertPayment(payment)
             if (payment.bookingId.isNotBlank()) {
                 val booking = bookingDao.getBookingById(payment.bookingId)
                 if (booking != null) {
                     val allPayments = paymentDao.getPaymentsForBookingDirect(payment.bookingId)
-                    val totalPaidAmount = allPayments
-                        .filter {
-                            it.verificationStatus == "VERIFIED"
-                        }
-                        .sumOf { it.amount }
+                    val totalPaidAmount = allPayments.sumOf { it.amount }
                     bookingDao.updateBooking(booking.copy(paid = totalPaidAmount, updatedAt = System.currentTimeMillis()))
                 }
             }
@@ -516,11 +508,7 @@ class HotelRepository(private val database: AppDatabase) {
                 val invoice = invoiceDao.getInvoiceByNumber(payment.invoiceId)
                 if (invoice != null) {
                     val allPayments = paymentDao.getPaymentsForBookingDirect(invoice.bookingId)
-                    val totalPaidAmount = allPayments
-                        .filter {
-                            it.verificationStatus == "VERIFIED"
-                        }
-                        .sumOf { it.amount }
+                    val totalPaidAmount = allPayments.sumOf { it.amount }
                     val newPending = (invoice.grandTotal - totalPaidAmount).coerceAtLeast(0.0)
                     val status = if (newPending <= 0.0) "PAID" else if (totalPaidAmount > 0) "PARTIALLY_PAID" else "PENDING"
                     invoiceDao.updateInvoice(

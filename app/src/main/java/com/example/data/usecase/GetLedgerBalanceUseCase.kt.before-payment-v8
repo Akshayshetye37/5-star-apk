@@ -31,18 +31,8 @@ class GetLedgerBalanceUseCase(
         val payments = paymentDao.getPaymentsForBookingDirect(folio.bookingId)
 
         val totalCharges = charges.sumOf { it.netAmount }
-        /*
-         * Only VERIFIED payments are authoritative financial postings.
-         * Pending, failed, cancelled and reversed payments do not reduce
-         * the outstanding folio balance.
-         *
-         * Legacy rows are migrated as VERIFIED in Room 7 -> 8.
-         */
         val totalPayments = payments
-            .filter {
-                it.amount > 0.0 &&
-                    it.verificationStatus == "VERIFIED"
-            }
+            .filter { it.amount > 0.0 }
             .sumOf { it.amount }
 
         val balance = totalCharges - totalPayments
