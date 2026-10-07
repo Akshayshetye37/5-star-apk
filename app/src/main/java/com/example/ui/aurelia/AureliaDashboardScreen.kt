@@ -2,22 +2,13 @@ package com.example.ui.aurelia
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.BookOnline
-import androidx.compose.material.icons.filled.EventAvailable
-import androidx.compose.material.icons.filled.MeetingRoom
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.viewmodel.HotelViewModel
@@ -31,6 +22,14 @@ fun AureliaDashboardScreen(
 ) {
     val stats by viewModel.dashboardStats.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val rooms by viewModel.rooms.collectAsStateWithLifecycle()
+
+    val today = DateUtils.formatDisplayDate(System.currentTimeMillis())
+    val occupancy =
+        if (stats.occupiedRooms + stats.availableRooms + stats.reservedRooms > 0)
+            "${(stats.occupiedRooms.toDouble() /
+                    (stats.occupiedRooms + stats.availableRooms + stats.reservedRooms) * 100).toInt()}%"
+        else "0%"
 
     LazyColumn(
         modifier = Modifier
@@ -40,73 +39,165 @@ fun AureliaDashboardScreen(
         verticalArrangement = Arrangement.spacedBy(AureliaDimens.SectionGap)
     ) {
         item {
-            Column {
-                Text(
-                    "Good day",
-                    color = AureliaColors.Muted,
-                    fontSize = AureliaTypography.Body
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                AureliaHeroTitle(
+                    title = "Hotel command center",
+                    subtitle = "${settings.hotelName} · Live operational overview · $today"
                 )
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    settings.hotelName,
-                    color = AureliaColors.Ink,
-                    fontSize = AureliaTypography.Hero,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    DateUtils.formatDisplayDate(System.currentTimeMillis()),
-                    color = AureliaColors.Muted,
-                    fontSize = AureliaTypography.Caption
-                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AureliaButton(
+                        "＋ New booking",
+                        primary = true,
+                        onClick = {
+                            viewModel.editingBooking.value = null
+                            onNavigate("NEW_BOOKING")
+                        }
+                    )
+                    AureliaButton(
+                        "Reservation",
+                        onClick = { onNavigate("RESERVATIONS") }
+                    )
+                    AureliaButton(
+                        "POS",
+                        onClick = { onNavigate("FOOD") }
+                    )
+                }
             }
         }
 
         item {
-            AureliaCard {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(AureliaColors.Ink)
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        "Aurelia Hotel Operations",
-                        color = Color.White.copy(alpha = .65f),
-                        fontSize = AureliaTypography.Caption
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 145.dp),
+                modifier = Modifier.heightIn(min = 150.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                userScrollEnabled = false
+            ) {
+                item {
+                    AureliaKpiCard(
+                        "Occupancy",
+                        occupancy,
+                        "${stats.occupiedRooms} occupied · ${stats.availableRooms} available"
                     )
-                    Spacer(Modifier.height(5.dp))
-                    Text(
-                        "Everything under control.",
-                        color = Color.White,
-                        fontSize = AureliaTypography.Title,
-                        fontWeight = FontWeight.Bold
+                }
+                item {
+                    AureliaKpiCard(
+                        "Arrivals",
+                        stats.todayCheckIns.toString(),
+                        "Today"
                     )
-                    Spacer(Modifier.height(18.dp))
-                    Row(Modifier.fillMaxWidth()) {
-                        Column(Modifier.weight(1f)) {
-                            Text("Revenue", color = Color.White.copy(alpha = .65f), fontSize = 11.sp)
-                            Text(
-                                CurrencyFormatter.formatWhole(
-                                    stats.todayRevenue,
-                                    settings.currencySymbol
-                                ),
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Column(Modifier.weight(1f)) {
-                            Text("Outstanding", color = Color.White.copy(alpha = .65f), fontSize = 11.sp)
-                            Text(
-                                CurrencyFormatter.formatWhole(
-                                    stats.pendingPayments,
-                                    settings.currencySymbol
-                                ),
-                                color = AureliaColors.Gold,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                }
+                item {
+                    AureliaKpiCard(
+                        "Departures",
+                        stats.todayCheckOuts.toString(),
+                        "Today"
+                    )
+                }
+                item {
+                    AureliaKpiCard(
+                        "Reserved",
+                        stats.reservedRooms.toString(),
+                        "Confirmed"
+                    )
+                }
+                item {
+                    AureliaKpiCard(
+                        "Guests in house",
+                        stats.currentGuests.toString(),
+                        "Active stays"
+                    )
+                }
+                item {
+                    AureliaKpiCard(
+                        "Outstanding",
+                        CurrencyFormatter.formatWhole(
+                            stats.pendingPayments,
+                            settings.currencySymbol
+                        ),
+                        "All active folios"
+                    )
+                }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AureliaCard(Modifier.weight(1.4f)) {
+                    AureliaSectionHeader(
+                        "Attention",
+                        "Reports"
+                    ) {
+                        onNavigate("REPORTS")
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                        AureliaAttentionRow(
+                            "Pending dues across active folios",
+                            CurrencyFormatter.formatWhole(
+                                stats.pendingPayments,
+                                settings.currencySymbol
+                            ),
+                            danger = stats.pendingPayments > 0
+                        )
+                        AureliaAttentionRow(
+                            "Inventory below reorder level",
+                            "—",
+                            warning = true
+                        )
+                        AureliaAttentionRow(
+                            "Rooms requiring housekeeping",
+                            "—"
+                        )
+                        AureliaAttentionRow(
+                            "Payment announcement",
+                            "ON"
+                        )
+                    }
+                }
+
+                AureliaCard(Modifier.weight(1f)) {
+                    AureliaSectionHeader(
+                        "Recent activity",
+                        "Audit"
+                    ) {
+                        onNavigate("REPORTS")
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    if (stats.recentBookings.isEmpty()) {
+                        Text(
+                            "No activity yet",
+                            color = AureliaColors.Muted
+                        )
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(11.dp)
+                        ) {
+                            stats.recentBookings.take(5).forEach { booking ->
+                                Column {
+                                    androidx.compose.material3.Text(
+                                        booking.bookingId,
+                                        color = AureliaColors.Ink,
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                    )
+                                    androidx.compose.material3.Text(
+                                        booking.customerName,
+                                        color = AureliaColors.Muted,
+                                        fontSize = AureliaTypography.Caption
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -114,103 +205,43 @@ fun AureliaDashboardScreen(
         }
 
         item {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AureliaMetricCard(
-                    "Revenue",
-                    CurrencyFormatter.formatWhole(stats.todayRevenue, settings.currencySymbol),
-                    "Today's payments",
-                    Icons.Default.Payments,
-                    Modifier.weight(1f)
-                ) { onNavigate("PAYMENTS") }
-
-                AureliaMetricCard(
-                    "Pending",
-                    CurrencyFormatter.formatWhole(stats.pendingPayments, settings.currencySymbol),
-                    "Outstanding",
-                    Icons.Default.Receipt,
-                    Modifier.weight(1f),
-                    AureliaColors.Danger
-                ) { onNavigate("INVOICE_HISTORY") }
-            }
-        }
-
-        item {
-            Text(
-                "Hotel operations",
-                color = AureliaColors.Ink,
-                fontSize = AureliaTypography.Section,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        item {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AureliaAction(
-                    "New stay",
-                    "Create booking",
-                    Icons.Default.BookOnline,
-                    Modifier.weight(1f)
+            AureliaCard {
+                AureliaSectionHeader(
+                    "Room command board",
+                    "Manage rooms"
                 ) {
-                    viewModel.editingBooking.value = null
-                    onNavigate("NEW_BOOKING")
+                    onNavigate("ROOMS")
                 }
 
-                AureliaAction(
-                    "Reservation",
-                    "Reserve room",
-                    Icons.Default.EventAvailable,
-                    Modifier.weight(1f)
-                ) {
-                    onNavigate("RESERVATIONS")
+                Spacer(Modifier.height(12.dp))
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    rooms.forEach { room ->
+                        AureliaRoomCard(
+                            roomNumber = room.roomNumber,
+                            roomType = room.roomType,
+                            rate = CurrencyFormatter.formatWhole(
+                                room.rate,
+                                settings.currencySymbol
+                            ),
+                            status = room.status,
+                            guest = null,
+                            checkout = null,
+                            onFolio = { onNavigate("PAYMENTS") },
+                            onManage = {
+                                viewModel.editingRoom.value = room
+                                onNavigate("ROOMS")
+                            }
+                        )
+                    }
+
+                    if (rooms.isEmpty()) {
+                        androidx.compose.material3.Text(
+                            "No rooms configured.",
+                            color = AureliaColors.Muted
+                        )
+                    }
                 }
-            }
-        }
-
-        item {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AureliaAction(
-                    "Rooms",
-                    "Availability",
-                    Icons.Default.MeetingRoom,
-                    Modifier.weight(1f)
-                ) { onNavigate("ROOMS") }
-
-                AureliaAction(
-                    "Guests",
-                    "Guest database",
-                    Icons.Default.People,
-                    Modifier.weight(1f)
-                ) { onNavigate("CUSTOMERS") }
-            }
-        }
-
-        item {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AureliaAction(
-                    "Invoice",
-                    "Create invoice",
-                    Icons.Default.Receipt,
-                    Modifier.weight(1f)
-                ) { onNavigate("INVOICE_GENERATOR") }
-
-                AureliaAction(
-                    "Payment",
-                    "Record payment",
-                    Icons.Default.AddCircle,
-                    Modifier.weight(1f)
-                ) { onNavigate("PAYMENTS") }
             }
         }
     }
