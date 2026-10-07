@@ -43,3 +43,5 @@ jobs:
           name: aurelia-pms-debug-apk
           path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
+
+# Aurelia CI active
