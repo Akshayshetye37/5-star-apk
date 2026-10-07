@@ -72,6 +72,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ui.aurelia.AureliaDashboardScreen
 import com.example.ui.screens.BackupRestoreScreen
 import com.example.ui.screens.BookingsListScreen
 import com.example.ui.screens.CustomersScreen
@@ -331,7 +332,7 @@ fun HotelApp(viewModel: HotelViewModel) {
                         viewModel = viewModel,
                         onNavigate = { sec -> viewModel.navigateTo(sec) }
                     )
-                    "DASHBOARD" -> DashboardScreen(
+                    "DASHBOARD" -> AureliaDashboardScreen(
                         viewModel = viewModel,
                         onNavigate = { sec -> viewModel.navigateTo(sec) }
                     )
